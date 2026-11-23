@@ -1,0 +1,3338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>소중한 분을 초대합니다</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>" />
+
+  <!-- =========================================================
+       카카오톡 공유용 오픈그래프(OG) 메타태그 (스포일러 없음)
+       * 실제 웹 호스팅(GitHub Pages, Netlify 등)에 올린 후에는
+         og:image의 content를 "https://도메인/og-cover.png"처럼
+         전체 URL(절대경로)로 바꾸면 카카오톡 미리보기가 가장 잘 뜹니다.
+       ========================================================= -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="소중한 분을 초대합니다" />
+  <meta property="og:description" content="도착한 초대장을 확인해 주세요" />
+  <meta property="og:image" content="https://jinmoojh-alt.github.io/ttokong/og-cover.png" />
+
+  <!-- 따뜻한 한국어 손글씨 웹폰트 (Gamja Flower, Gaegu, Nanum Pen Script) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gamja+Flower&family=Nanum+Pen+Script&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --bg-outer: #EFE8DC;
+      --bg-cream: #FDF9F0;
+      --paper-white: #FFFDF8;
+      --accent-butter: #FCE5A2;
+      --accent-butter-deep: #F1C967;
+      --accent-sage: #D4E4D1;
+      --accent-sage-deep: #587A5A;
+      --accent-peach: #F9D6CE;
+      --accent-coral: #E67B73;
+      --text-brown: #4A3E35;
+      --text-soft: #7D6D60;
+      --border-warm: #EBDDC7;
+      --shadow-warm: rgba(74, 62, 53, 0.08);
+      --font-hand: 'Gamja Flower', 'Gaegu', cursive;
+      --font-clean: 'Gaegu', cursive;
+      --font-pen: 'Nanum Pen Script', 'Gamja Flower', cursive;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      background-color: var(--bg-outer);
+      color: var(--text-brown);
+      font-family: var(--font-hand);
+      font-size: 19px;
+      line-height: 1.65;
+      word-break: keep-all;
+      overflow-x: hidden;
+    }
+
+    /* 스마트폰 세로 화면 최적화 + 은은한 도화지 질감 */
+    .app-shell {
+      position: relative;
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0 auto;
+      background-color: var(--bg-cream);
+      background-image:
+        radial-gradient(circle at 18% 12%, rgba(252, 229, 162, 0.28) 0%, transparent 42%),
+        radial-gradient(circle at 86% 36%, rgba(249, 214, 206, 0.24) 0%, transparent 40%),
+        radial-gradient(circle at 22% 72%, rgba(212, 228, 209, 0.25) 0%, transparent 45%),
+        radial-gradient(rgba(74, 62, 53, 0.04) 1px, transparent 1px);
+      background-size: auto, auto, auto, 18px 18px;
+      box-shadow: 0 0 38px rgba(74, 62, 53, 0.1);
+      overflow-x: hidden;
+    }
+
+    /* 꽃가루(Confetti) & 떠오르는 하트 레이어 */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      height: 100vh;
+      height: 100dvh;
+      pointer-events: none;
+      z-index: 60;
+    }
+
+    #floating-hearts-layer {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      height: 100vh;
+      height: 100dvh;
+      pointer-events: none;
+      z-index: 55;
+      overflow: hidden;
+    }
+
+    /* =========================================================
+       동화책 상단 고정 바 (진행률 + 페이지 점 + 전체보기 + 오르골)
+       ========================================================= */
+    .storybook-topbar {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      width: 100%;
+      max-width: 430px;
+      z-index: 48;
+      background: rgba(253, 249, 240, 0.94);
+      backdrop-filter: blur(8px);
+      border-bottom: 1.5px solid rgba(235, 221, 199, 0.85);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
+    }
+
+    .storybook-topbar.is-visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .storybook-progress-track {
+      width: 100%;
+      height: 3px;
+      background: rgba(235, 221, 199, 0.55);
+      overflow: hidden;
+    }
+
+    .storybook-progress-bar {
+      width: 12.5%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-sage-deep) 0%, var(--accent-butter-deep) 100%);
+      border-radius: 0 999px 999px 0;
+      transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .storybook-topbar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 14px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .page-counter-badge {
+      font-family: var(--font-clean);
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-brown);
+      background: #FFF6DC;
+      border: 1px solid #EED694;
+      padding: 2px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .page-dots {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    @media (max-width: 390px) {
+      .page-dots {
+        display: none;
+      }
+    }
+
+    .page-dots.is-hidden {
+      display: none;
+    }
+
+    .page-dot {
+      width: 7px;
+      height: 7px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: #DFD2BE;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.2s ease, width 0.2s ease;
+    }
+
+    .page-dot.is-active {
+      width: 16px;
+      border-radius: 999px;
+      background: var(--accent-coral);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .topbar-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1.5px solid var(--border-warm);
+      background: var(--paper-white);
+      box-shadow: 0 2px 8px rgba(74, 62, 53, 0.06);
+      color: var(--text-brown);
+      font-family: var(--font-clean);
+      font-size: 14.5px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .topbar-pill-btn:active {
+      transform: scale(0.96);
+    }
+
+    .topbar-pill-btn.is-playing,
+    .topbar-pill-btn.is-active-mode {
+      background: #FFF6DC;
+      border-color: var(--accent-butter-deep);
+    }
+
+    /* =========================================================
+       [섹션 1: 스포일러 방지 서프라이즈 인트로]
+       ========================================================= */
+    .intro-screen {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      height: 100vh;
+      height: 100dvh;
+      background:
+        radial-gradient(circle at 50% 24%, #FFFDF8 0%, var(--bg-cream) 64%, #F7EFE0 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 24px;
+      z-index: 50;
+      transition: opacity 0.42s ease, transform 0.42s ease, visibility 0.42s ease;
+    }
+
+    .intro-screen.is-hidden {
+      opacity: 0;
+      transform: translateX(-50%) scale(1.03);
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .intro-stars-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .bg-sparkle {
+      position: absolute;
+      opacity: 0.72;
+      animation: twinkleStar 4.5s ease-in-out infinite;
+    }
+
+    .bg-sparkle.s1 { top: 12%; left: 14%; width: 26px; animation-delay: 0s; }
+    .bg-sparkle.s2 { top: 18%; right: 14%; width: 32px; animation-delay: 1.2s; }
+    .bg-sparkle.s3 { bottom: 16%; left: 12%; width: 28px; animation-delay: 2.1s; }
+    .bg-sparkle.s4 { bottom: 20%; right: 16%; width: 22px; animation-delay: 0.7s; }
+
+    @keyframes twinkleStar {
+      0%, 100% { transform: scale(1) translateY(0); opacity: 0.55; }
+      50% { transform: scale(1.16) translateY(-5px); opacity: 0.95; }
+    }
+
+    .intro-top-emblem {
+      width: 68px;
+      height: 68px;
+      margin-bottom: 16px;
+      border-radius: 50%;
+      background: #FFFDF8;
+      border: 1.5px solid var(--border-warm);
+      box-shadow: 0 8px 20px rgba(74, 62, 53, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: gentleBob 3.6s ease-in-out infinite;
+      z-index: 2;
+    }
+
+    @keyframes gentleBob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .intro-caption {
+      font-family: var(--font-hand);
+      font-size: 25px;
+      font-weight: 700;
+      color: var(--text-brown);
+      text-align: center;
+      line-height: 1.45;
+      margin-bottom: 26px;
+      z-index: 2;
+    }
+
+    .intro-caption .touch-hint {
+      display: inline-block;
+      margin-top: 12px;
+      font-family: var(--font-clean);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-brown);
+      background-color: var(--accent-butter);
+      border: 1.5px solid #F0D284;
+      padding: 4px 16px;
+      border-radius: 999px;
+      box-shadow: 0 4px 10px rgba(241, 201, 103, 0.35);
+    }
+
+    /* 디테일 봉투 (코튼지 + 우표 + 소인 + 입체 밀랍 인장) */
+    .envelope-btn {
+      position: relative;
+      width: 286px;
+      height: 188px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      perspective: 900px;
+      z-index: 2;
+      touch-action: manipulation;
+      animation: envelopePulse 2.6s ease-in-out infinite;
+    }
+
+    @keyframes envelopePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.022); }
+    }
+
+    .envelope-btn.is-opening {
+      animation: none;
+    }
+
+    .envelope-body {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: var(--paper-white);
+      border: 2px solid #E5D6BE;
+      border-radius: 16px;
+      box-shadow: 0 16px 34px rgba(74, 62, 53, 0.14);
+      overflow: hidden;
+    }
+
+    /* 봉투 내부 미세 점선 테두리 */
+    .envelope-body::after {
+      content: '';
+      position: absolute;
+      inset: 7px;
+      border: 1px dashed rgba(203, 184, 154, 0.55);
+      border-radius: 10px;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    /* 우측 하단 미니 우표 & 원형 소인 스탬프 (덮개와 겹치지 않는 위치) */
+    .envelope-stamp-wrap {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      z-index: 4;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .envelope-postmark {
+      width: 44px;
+      height: 44px;
+      margin-right: -14px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(125, 109, 96, 0.45);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-clean);
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1.1;
+      color: rgba(125, 109, 96, 0.72);
+      transform: rotate(-14deg);
+    }
+
+    .envelope-stamp {
+      width: 40px;
+      height: 48px;
+      background: linear-gradient(160deg, #FFF5DB 0%, var(--accent-peach) 100%);
+      border: 2px dotted #E7B7A9;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(74, 62, 53, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-clean);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-brown);
+      line-height: 1.15;
+    }
+
+    .envelope-stamp span:first-child {
+      font-size: 15px;
+      margin-bottom: 1px;
+    }
+
+    /* 봉투 안쪽 속지 (개봉 전엔 숨김, 열릴 때 스르륵 올라옴) */
+    .envelope-letter-peek {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 14px;
+      height: 124px;
+      background: #FFFDF7;
+      border: 1.5px dashed #E7D4AE;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-hand);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-brown);
+      opacity: 0;
+      transform: translateY(18px);
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+      z-index: 1;
+    }
+
+    .envelope-btn.is-opening .envelope-letter-peek {
+      opacity: 1;
+      transform: translateY(-56px);
+    }
+
+    /* 봉투 앞면 주머니 */
+    .envelope-front-pocket {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .envelope-front-pocket::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 122px;
+      background: linear-gradient(180deg, #FFFDF9 0%, #F9EFE0 100%);
+      clip-path: polygon(0 0, 50% 42%, 100% 0, 100% 100%, 0 100%);
+      border-top: 1px solid #EAE0CD;
+    }
+
+    /* 봉투 윗덮개 */
+    .envelope-flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 116px;
+      transform-origin: top center;
+      transform-style: preserve-3d;
+      transition: transform 0.62s cubic-bezier(0.34, 1.25, 0.64, 1);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .envelope-flap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, var(--accent-butter) 0%, #F5D47D 100%);
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      border-radius: 14px 14px 0 0;
+      filter: drop-shadow(0 3px 4px rgba(74, 62, 53, 0.08));
+    }
+
+    .envelope-btn.is-opening .envelope-flap {
+      transform: rotateX(175deg);
+      z-index: 0;
+    }
+
+    /* 입체 밀랍 인장 (Wax Seal) */
+    .envelope-seal {
+      position: absolute;
+      top: 84px;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 32% 30%, #F6ABA4 0%, var(--accent-coral) 58%, #C95B53 100%);
+      border: 3px solid rgba(255, 253, 248, 0.92);
+      box-shadow:
+        0 6px 14px rgba(201, 91, 83, 0.35),
+        inset 0 0 0 3px rgba(255, 255, 255, 0.28),
+        inset 0 -3px 6px rgba(120, 35, 30, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 23px;
+      z-index: 6;
+      transition: transform 0.35s ease, opacity 0.35s ease;
+    }
+
+    .envelope-seal::before {
+      content: '';
+      position: absolute;
+      top: 7px;
+      left: 11px;
+      width: 14px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.35);
+      transform: rotate(-28deg);
+    }
+
+    .envelope-btn.is-opening .envelope-seal {
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 0;
+    }
+
+    /* =========================================================
+       메인 동화책 본문 & 페이지 전환
+       ========================================================= */
+    .main-content {
+      display: none;
+      padding: 64px 0 92px;
+      opacity: 0;
+      transition: opacity 0.65s ease;
+    }
+
+    .main-content.is-visible {
+      display: block;
+      opacity: 1;
+    }
+
+    .main-content.is-all-view {
+      padding: 70px 20px 56px;
+    }
+
+    .story-page {
+      display: none;
+    }
+
+    .story-page.is-active {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 156px);
+      min-height: calc(100dvh - 156px);
+      padding: 10px 20px 16px;
+    }
+
+    .story-page-inner {
+      width: 100%;
+      margin: auto 0;
+    }
+
+    .story-page.enter-next {
+      animation: slideFromRight 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .story-page.enter-prev {
+      animation: slideFromLeft 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes slideFromRight {
+      0% { opacity: 0; transform: translateX(26px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideFromLeft {
+      0% { opacity: 0; transform: translateX(-26px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    /* 전체 보기 모드에서는 활성 페이지 모두 세로로 펼침 */
+    .main-content.is-all-view .story-page {
+      display: block;
+      min-height: auto;
+      padding: 0;
+      animation: none;
+    }
+
+    .main-content.is-all-view .story-page.is-disabled-page {
+      display: none;
+    }
+
+    .main-content.is-all-view .story-page-inner {
+      margin: 0;
+    }
+
+    /* 섹션 사이 손그림 점선/별 구분선 (전체 보기 모드에서만 표시) */
+    .story-divider {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 26px 0;
+      opacity: 0.75;
+    }
+
+    .main-content.is-all-view .story-divider:not(.is-disabled-divider) {
+      display: flex;
+    }
+
+    .story-divider span {
+      flex: 1;
+      max-width: 78px;
+      height: 0;
+      border-top: 2px dashed #DFCFAE;
+    }
+
+    /* 1페이지 반전 히어로 요약 칩 */
+    .reveal-summary-chips {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .reveal-chip {
+      font-family: var(--font-clean);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-brown);
+      background: var(--paper-white);
+      border: 1.5px solid var(--border-warm);
+      border-radius: 999px;
+      padding: 5px 14px;
+      box-shadow: 0 3px 10px rgba(74, 62, 53, 0.06);
+    }
+
+    /* 3페이지 성장 수첩 하단 보조 문구 */
+    .growth-story-note {
+      margin-top: 14px;
+      text-align: center;
+      font-family: var(--font-hand);
+      font-size: 20px;
+      color: var(--text-soft);
+    }
+
+    /* 공통 제목 스타일 */
+    .section-title {
+      font-family: var(--font-hand);
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--text-brown);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    /* =========================================================
+       [섹션 2: 반전 히어로 + 마스킹 테이프 편지지]
+       ========================================================= */
+    .reveal-hero {
+      text-align: center;
+      padding: 12px 6px 8px;
+      margin-bottom: 18px;
+    }
+
+    .sheep-hero-wrap {
+      width: 176px;
+      margin: 0 auto 10px;
+      animation: gentleBob 3.4s ease-in-out infinite;
+    }
+
+    .year-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: var(--accent-butter);
+      color: var(--text-brown);
+      font-family: var(--font-clean);
+      font-size: 17px;
+      font-weight: 700;
+      padding: 5px 15px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+      box-shadow: 0 3px 10px rgba(241, 201, 103, 0.35);
+    }
+
+    .reveal-title {
+      font-family: var(--font-hand);
+      font-size: 31px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--text-brown);
+      margin-bottom: 8px;
+    }
+
+    .reveal-subtitle {
+      font-family: var(--font-clean);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-soft);
+    }
+
+    /* 아날로그 마스킹 테이프 편지지 */
+    .letter-sheet {
+      position: relative;
+      background-color: var(--paper-white);
+      border: 1.5px solid var(--border-warm);
+      border-radius: 16px;
+      padding: 32px 20px 26px;
+      box-shadow: 0 12px 28px var(--shadow-warm);
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 33px,
+        #F2EAD9 34px
+      );
+      background-position: 0 30px;
+    }
+
+    /* 좌우 상단 마스킹 테이프 */
+    .letter-sheet::before,
+    .letter-sheet::after {
+      content: '';
+      position: absolute;
+      top: -11px;
+      width: 72px;
+      height: 22px;
+      opacity: 0.85;
+      border-radius: 3px;
+      box-shadow: 0 2px 6px rgba(74, 62, 53, 0.1);
+    }
+
+    .letter-sheet::before {
+      left: 16px;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(249, 214, 206, 0.92),
+        rgba(249, 214, 206, 0.92) 8px,
+        rgba(255, 240, 236, 0.92) 8px,
+        rgba(255, 240, 236, 0.92) 16px
+      );
+      transform: rotate(-14deg);
+    }
+
+    .letter-sheet::after {
+      right: 16px;
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(212, 228, 209, 0.92),
+        rgba(212, 228, 209, 0.92) 8px,
+        rgba(235, 244, 233, 0.92) 8px,
+        rgba(235, 244, 233, 0.92) 16px
+      );
+      transform: rotate(12deg);
+    }
+
+    .letter-greeting-chip {
+      display: inline-block;
+      font-family: var(--font-clean);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent-sage-deep);
+      background: rgba(212, 228, 209, 0.55);
+      padding: 2px 12px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+
+    .letter-text {
+      font-family: var(--font-hand);
+      font-size: 21.5px;
+      line-height: 34px;
+      color: var(--text-brown);
+      letter-spacing: -0.01em;
+    }
+
+    .letter-text p + p {
+      margin-top: 12px;
+    }
+
+    .letter-sign {
+      margin-top: 20px;
+      text-align: right;
+      font-family: var(--font-hand);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-soft);
+    }
+
+    /* =========================================================
+       [섹션 3: 오늘의 또콩이 성장 다이어리 노트]
+       ========================================================= */
+    .growth-notebook {
+      background: var(--paper-white);
+      border: 1.5px solid #D9E4D6;
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 10px 26px var(--shadow-warm);
+    }
+
+    .growth-header-strip {
+      background: linear-gradient(135deg, var(--accent-sage) 0%, #E5EFE2 100%);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1.5px dashed #BDD0B9;
+    }
+
+    .growth-header-strip h2 {
+      font-family: var(--font-hand);
+      font-size: 23px;
+      font-weight: 700;
+      color: #3D563F;
+    }
+
+    .growth-week-pill {
+      font-family: var(--font-clean);
+      font-size: 15px;
+      font-weight: 700;
+      background: var(--paper-white);
+      color: var(--accent-sage-deep);
+      padding: 3px 11px;
+      border-radius: 999px;
+      border: 1px solid #C2D6BF;
+    }
+
+    .growth-body {
+      padding: 22px 20px 24px;
+      text-align: center;
+    }
+
+    .growth-fruit-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: left;
+      background: #FAFDF9;
+      border: 1px solid #E3ECE1;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+    }
+
+    .growth-emoji-badge {
+      flex-shrink: 0;
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #FFFDF6 0%, var(--accent-butter) 100%);
+      border: 2px solid #F3DC99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      box-shadow: 0 4px 10px rgba(241, 201, 103, 0.25);
+    }
+
+    .growth-status-title {
+      font-family: var(--font-hand);
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--text-brown);
+      margin-bottom: 4px;
+    }
+
+    .growth-status-desc {
+      font-family: var(--font-clean);
+      font-size: 16.5px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--text-soft);
+    }
+
+    .growth-progress-wrap {
+      padding-top: 6px;
+    }
+
+    .growth-track {
+      position: relative;
+      height: 14px;
+      background: #EDEAE1;
+      border-radius: 999px;
+      margin: 18px 8px 8px;
+      box-shadow: inset 0 1px 3px rgba(74, 62, 53, 0.08);
+    }
+
+    .growth-fill {
+      position: relative;
+      height: 100%;
+      width: 15%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-sage) 0%, var(--accent-butter-deep) 100%);
+      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .growth-walker {
+      position: absolute;
+      right: -13px;
+      top: 50%;
+      transform: translateY(-54%);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--paper-white);
+      border: 2px solid var(--accent-butter-deep);
+      box-shadow: 0 2px 6px rgba(74, 62, 53, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .growth-scale-labels {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-clean);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-soft);
+      padding: 0 4px;
+    }
+
+    /* =========================================================
+       [섹션 4: 손가락으로 쓱쓱! 초음파 복권 + 확대 라이트박스]
+       ========================================================= */
+    .photo-section-wrap {
+      text-align: center;
+      padding: 6px 4px;
+    }
+
+    .photo-guide-sub {
+      font-family: var(--font-clean);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-soft);
+      margin-bottom: 16px;
+    }
+
+    .polaroid-frame {
+      position: relative;
+      background-color: #FFFFFF;
+      border: 1.5px solid #EAE0CF;
+      border-radius: 12px;
+      padding: 16px 14px 20px;
+      box-shadow: 0 14px 28px rgba(74, 62, 53, 0.12);
+      transform: rotate(-1.2deg);
+      transition: transform 0.3s ease;
+    }
+
+    .polaroid-frame.is-revealed {
+      transform: rotate(0deg);
+    }
+
+    /* 폴라로이드 상단 중앙 마스킹 테이프 */
+    .polaroid-tape {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%) rotate(1.8deg);
+      width: 94px;
+      height: 24px;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(252, 229, 162, 0.9),
+        rgba(252, 229, 162, 0.9) 10px,
+        rgba(255, 245, 214, 0.9) 10px,
+        rgba(255, 245, 214, 0.9) 20px
+      );
+      border-radius: 3px;
+      box-shadow: 0 2px 5px rgba(74, 62, 53, 0.1);
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .polaroid-photo-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background-color: #2A2521;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .polaroid-photo-box.is-zoomable {
+      cursor: zoom-in;
+    }
+
+    .polaroid-photo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .ultrasound-fallback {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      color: #F7EFE2;
+      font-family: var(--font-clean);
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .scratch-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      cursor: pointer;
+      z-index: 3;
+      transition: opacity 0.55s ease;
+    }
+
+    .scratch-canvas.is-cleared {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .polaroid-caption {
+      margin-top: 16px;
+      text-align: center;
+      font-family: var(--font-pen);
+      font-size: 27px;
+      line-height: 1.25;
+      color: var(--text-brown);
+    }
+
+    .photo-actions-row {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .reveal-photo-btn {
+      border: 1.5px solid #EBD392;
+      background: #FFF8E3;
+      color: var(--text-brown);
+      font-family: var(--font-clean);
+      font-size: 16.5px;
+      font-weight: 700;
+      padding: 8px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(241, 201, 103, 0.25);
+      transition: transform 0.15s ease;
+    }
+
+    .reveal-photo-btn:active {
+      transform: scale(0.96);
+    }
+
+    .reveal-photo-btn.is-hidden {
+      display: none;
+    }
+
+    .zoom-hint-text {
+      display: none;
+      font-family: var(--font-clean);
+      font-size: 15.5px;
+      font-weight: 700;
+      color: var(--accent-sage-deep);
+      background: rgba(212, 228, 209, 0.45);
+      padding: 4px 14px;
+      border-radius: 999px;
+    }
+
+    .zoom-hint-text.is-visible {
+      display: inline-block;
+    }
+
+    /* 초음파 확대 라이트박스 모달 */
+    .photo-lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(34, 27, 22, 0.86);
+      backdrop-filter: blur(4px);
+      z-index: 90;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .photo-lightbox.is-open {
+      display: flex;
+    }
+
+    .lightbox-card {
+      width: 100%;
+      max-width: 410px;
+      background: #FFFFFF;
+      border-radius: 16px;
+      padding: 14px 14px 18px;
+      text-align: center;
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.35);
+    }
+
+    .lightbox-card img {
+      width: 100%;
+      max-height: 68dvh;
+      object-fit: contain;
+      background: #1E1A17;
+      border-radius: 10px;
+      display: block;
+    }
+
+    .lightbox-caption {
+      margin-top: 12px;
+      font-family: var(--font-hand);
+      font-size: 22px;
+      color: var(--text-brown);
+    }
+
+    .lightbox-close-btn {
+      margin-top: 14px;
+      border: none;
+      background: var(--accent-butter);
+      color: var(--text-brown);
+      font-family: var(--font-clean);
+      font-size: 18px;
+      font-weight: 700;
+      padding: 10px 28px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    /* =========================================================
+       [섹션 5: 심장소리 듣기 (조건부 활성화 구조)]
+       ========================================================= */
+    .heartbeat-card {
+      text-align: center;
+      background: linear-gradient(180deg, #FFFDF8 0%, #FFF2EA 100%);
+      border: 1.5px solid #F3D9D0;
+      border-radius: 24px;
+      padding: 28px 20px;
+      box-shadow: 0 12px 26px rgba(230, 123, 115, 0.08);
+    }
+
+    .heartbeat-subtitle {
+      font-family: var(--font-clean);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-soft);
+      margin-bottom: 22px;
+    }
+
+    .heartbeat-btn-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .heartbeat-ring {
+      position: absolute;
+      width: 158px;
+      height: 158px;
+      border-radius: 50%;
+      background-color: rgba(249, 214, 206, 0.55);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .heartbeat-btn-wrap.is-playing .heartbeat-ring {
+      animation: rippleRing 1.1s ease-out infinite;
+    }
+
+    @keyframes rippleRing {
+      0% { transform: scale(0.95); opacity: 0.85; }
+      100% { transform: scale(1.34); opacity: 0; }
+    }
+
+    .heartbeat-btn {
+      position: relative;
+      width: 148px;
+      height: 148px;
+      border-radius: 50%;
+      border: 4px solid var(--accent-butter);
+      background: radial-gradient(circle at 50% 35%, #FFFFFF 0%, #FFF7EE 100%);
+      box-shadow: 0 10px 24px rgba(230, 123, 115, 0.22);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      touch-action: manipulation;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      z-index: 2;
+    }
+
+    .heartbeat-btn:active {
+      transform: scale(0.95);
+    }
+
+    .heartbeat-btn.is-playing {
+      border-color: var(--accent-coral);
+      background: radial-gradient(circle at 50% 35%, #FFFDF9 0%, #FFEAE5 100%);
+    }
+
+    .heartbeat-heart-icon {
+      font-size: 29px;
+      line-height: 1;
+      display: inline-block;
+    }
+
+    .heartbeat-btn.is-playing .heartbeat-heart-icon {
+      animation: heartPulse 0.85s ease-in-out infinite;
+    }
+
+    @keyframes heartPulse {
+      0% { transform: scale(1); }
+      18% { transform: scale(1.3); }
+      34% { transform: scale(1.05); }
+      52% { transform: scale(1.24); }
+      100% { transform: scale(1); }
+    }
+
+    /* 5단 미니 음파 애니메이션 */
+    .soundwave-bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 5px;
+      height: 22px;
+      margin: 4px auto 8px;
+      opacity: 0.35;
+      transition: opacity 0.25s ease;
+    }
+
+    .soundwave-bars.is-playing {
+      opacity: 1;
+    }
+
+    .soundwave-bars span {
+      display: block;
+      width: 4px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent-coral);
+    }
+
+    .soundwave-bars.is-playing span {
+      animation: waveBounce 0.75s ease-in-out infinite alternate;
+    }
+
+    .soundwave-bars.is-playing span:nth-child(1) { animation-delay: 0s; }
+    .soundwave-bars.is-playing span:nth-child(2) { animation-delay: 0.14s; }
+    .soundwave-bars.is-playing span:nth-child(3) { animation-delay: 0.28s; }
+    .soundwave-bars.is-playing span:nth-child(4) { animation-delay: 0.14s; }
+    .soundwave-bars.is-playing span:nth-child(5) { animation-delay: 0.05s; }
+
+    @keyframes waveBounce {
+      0% { height: 6px; }
+      100% { height: 22px; }
+    }
+
+    .heartbeat-status-text {
+      font-family: var(--font-hand);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-brown);
+    }
+
+    .heartbeat-notice {
+      font-family: var(--font-clean);
+      font-size: 15.5px;
+      font-weight: 700;
+      color: #B45A52;
+      margin-top: 8px;
+      min-height: 22px;
+    }
+
+    /* =========================================================
+       [섹션 6: 2027년 7월 미니 손그림 달력 & D-Day]
+       ========================================================= */
+    .calendar-sheet {
+      background: var(--paper-white);
+      border: 1.5px solid var(--border-warm);
+      border-radius: 22px;
+      padding: 24px 18px;
+      box-shadow: 0 12px 26px var(--shadow-warm);
+      text-align: center;
+    }
+
+    .dday-banner {
+      background: linear-gradient(135deg, #FFF7DC 0%, var(--accent-butter) 100%);
+      border-radius: 16px;
+      padding: 16px 14px;
+      margin-bottom: 18px;
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.72);
+    }
+
+    .dday-label {
+      font-family: var(--font-clean);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-brown);
+    }
+
+    .dday-count {
+      font-family: var(--font-hand);
+      font-size: 46px;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--text-brown);
+      margin: 4px 0;
+    }
+
+    .dday-date-sub {
+      font-family: var(--font-clean);
+      font-size: 16.5px;
+      font-weight: 700;
+      color: var(--text-soft);
+    }
+
+    .mini-calendar {
+      background: #FFFEFA;
+      border: 1.5px dashed #E4D5BE;
+      border-radius: 16px;
+      padding: 16px 12px 18px;
+    }
+
+    .cal-month-title {
+      font-family: var(--font-hand);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-brown);
+      margin-bottom: 10px;
+    }
+
+    .cal-weekdays,
+    .cal-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      align-items: center;
+    }
+
+    .cal-weekdays span {
+      font-family: var(--font-clean);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-soft);
+      padding-bottom: 6px;
+    }
+
+    .cal-weekdays span:first-child { color: var(--accent-coral); }
+    .cal-weekdays span:last-child { color: #6787B0; }
+
+    .cal-cell {
+      position: relative;
+      height: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-clean);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-brown);
+    }
+
+    .cal-cell.is-sun { color: var(--accent-coral); }
+    .cal-cell.is-sat { color: #6787B0; }
+
+    .cal-cell.is-due-day {
+      justify-content: flex-start;
+      padding-top: 7px;
+      color: #C74F47;
+      font-size: 17.5px;
+    }
+
+    .cal-due-ring {
+      position: absolute;
+      top: 1px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 34px;
+      height: 31px;
+      pointer-events: none;
+    }
+
+    .cal-due-tag {
+      position: relative;
+      z-index: 2;
+      font-size: 10.5px;
+      line-height: 1;
+      color: #C74F47;
+      margin-top: 5px;
+      white-space: nowrap;
+    }
+
+    .cal-cell.is-due-day .cal-day-num {
+      position: relative;
+      z-index: 2;
+      line-height: 1;
+    }
+
+    /* =========================================================
+       [섹션 7: 사랑 보내기 + 5칸 하트 게이지 + 스페셜 피날레]
+       ========================================================= */
+    .love-box {
+      background: linear-gradient(180deg, #FFFDF8 0%, #FFF9EA 100%);
+      border: 1.5px solid #EFE0BE;
+      border-radius: 22px;
+      padding: 26px 20px;
+      text-align: center;
+      box-shadow: 0 12px 26px var(--shadow-warm);
+    }
+
+    .love-gauge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 8px 0 10px;
+    }
+
+    .gauge-slot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #F6EFE2;
+      border: 1.5px dashed #DFCFAE;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      opacity: 0.45;
+      filter: grayscale(0.8);
+      transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease;
+    }
+
+    .gauge-slot.is-filled {
+      opacity: 1;
+      filter: none;
+      background: #FFF3D4;
+      border: 1.5px solid var(--accent-butter-deep);
+      transform: scale(1.08);
+      box-shadow: 0 3px 8px rgba(241, 201, 103, 0.35);
+    }
+
+    .love-gauge-hint {
+      font-family: var(--font-clean);
+      font-size: 15.5px;
+      font-weight: 700;
+      color: var(--text-soft);
+      margin-bottom: 16px;
+    }
+
+    .love-btn {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #FBE294 0%, var(--accent-butter-deep) 100%);
+      color: var(--text-brown);
+      font-family: var(--font-hand);
+      font-size: 24px;
+      font-weight: 700;
+      padding: 15px 20px;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(241, 201, 103, 0.42);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      touch-action: manipulation;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .love-btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 4px 10px rgba(241, 201, 103, 0.3);
+    }
+
+    .love-counter-text {
+      margin-top: 14px;
+      font-family: var(--font-clean);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-brown);
+      min-height: 26px;
+    }
+
+    .love-reply-bubble {
+      display: none;
+      margin-top: 12px;
+      padding: 14px 16px;
+      background-color: #FFFDF6;
+      border: 1.5px solid var(--accent-butter-deep);
+      border-radius: 16px;
+      font-family: var(--font-hand);
+      font-size: 20.5px;
+      line-height: 1.45;
+      color: var(--text-brown);
+      box-shadow: 0 4px 12px rgba(241, 201, 103, 0.22);
+    }
+
+    .love-reply-bubble.show {
+      display: block;
+      animation: popReply 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .love-reply-bubble.is-special {
+      background: linear-gradient(135deg, #FFF7D6 0%, #FFE9DC 100%);
+      border: 2px solid #E9B954;
+      box-shadow: 0 8px 20px rgba(233, 185, 84, 0.32);
+    }
+
+    @keyframes popReply {
+      0% { opacity: 0; transform: translateY(6px) scale(0.95); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* 떠오르는 하트 애니메이션 */
+    .floating-heart {
+      position: absolute;
+      bottom: 120px;
+      font-size: 28px;
+      user-select: none;
+      animation: floatUpHeart 2.1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    }
+
+    @keyframes floatUpHeart {
+      0% { opacity: 0; transform: translateY(0) scale(0.6) rotate(0deg); }
+      20% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-340px) scale(1.25) rotate(14deg); }
+    }
+
+    /* =========================================================
+       [섹션 8: 예비 할아버지·할머니 취임 초대권 티켓]
+       ========================================================= */
+    .ticket-card {
+      position: relative;
+      background: var(--paper-white);
+      border: 1.5px solid var(--border-warm);
+      border-radius: 20px;
+      box-shadow: 0 12px 26px var(--shadow-warm);
+      overflow: hidden;
+    }
+
+    .ticket-top {
+      padding: 22px 22px 18px;
+      text-align: center;
+      background: linear-gradient(180deg, #FFFDF8 0%, #FFF9ED 100%);
+    }
+
+    .ticket-badge {
+      display: inline-block;
+      font-family: var(--font-clean);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent-sage-deep);
+      background: var(--accent-sage);
+      padding: 3px 12px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    .ticket-title {
+      font-family: var(--font-hand);
+      font-size: 25px;
+      font-weight: 700;
+      color: var(--text-brown);
+      margin-bottom: 14px;
+    }
+
+    .ticket-info-list {
+      text-align: left;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid #EFE4D2;
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .ticket-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      font-size: 17px;
+    }
+
+    .ticket-info-row .label {
+      font-family: var(--font-clean);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-soft);
+      flex-shrink: 0;
+    }
+
+    .ticket-info-row .value {
+      font-family: var(--font-hand);
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-brown);
+      text-align: right;
+    }
+
+    /* 좌우 반원 노치 절취선 */
+    .ticket-perforation {
+      position: relative;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      background: var(--paper-white);
+    }
+
+    .ticket-perforation::before,
+    .ticket-perforation::after {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--bg-cream);
+      border: 1.5px solid var(--border-warm);
+      top: 0;
+      z-index: 2;
+    }
+
+    .ticket-perforation::before { left: -12px; }
+    .ticket-perforation::after { right: -12px; }
+
+    .ticket-dash-line {
+      width: 100%;
+      margin: 0 18px;
+      border-top: 2px dashed #E1D1B8;
+    }
+
+    .ticket-stub {
+      padding: 12px 22px 18px;
+      text-align: center;
+      background: #FFF9EC;
+    }
+
+    .ticket-barcode {
+      height: 22px;
+      width: 168px;
+      margin: 0 auto 6px;
+      background: repeating-linear-gradient(
+        90deg,
+        #6C5B4D 0 2px,
+        transparent 2px 5px,
+        #6C5B4D 5px 8px,
+        transparent 8px 10px,
+        #6C5B4D 10px 11px,
+        transparent 11px 15px
+      );
+      opacity: 0.55;
+      border-radius: 2px;
+    }
+
+    .ticket-serial {
+      font-family: var(--font-clean);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-soft);
+      letter-spacing: 0.04em;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-family: var(--font-clean);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-soft);
+      margin-top: 20px;
+      padding-bottom: 8px;
+    }
+
+    /* 8페이지 하단 보조 액션 버튼 */
+    .ticket-actions-wrap {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .ticket-action-btn {
+      flex: 1;
+      border: 1.5px solid var(--border-warm);
+      background: var(--paper-white);
+      color: var(--text-brown);
+      font-family: var(--font-clean);
+      font-size: 16px;
+      font-weight: 700;
+      padding: 10px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(74, 62, 53, 0.06);
+      transition: transform 0.15s ease, background-color 0.2s ease;
+    }
+
+    .ticket-action-btn:active {
+      transform: scale(0.97);
+    }
+
+    .ticket-action-btn.is-primary {
+      background: #FFF6DC;
+      border-color: var(--accent-butter-deep);
+    }
+
+    /* 한 장씩 모드에선 하단 네비에 전체보기가 있으므로 중복 버튼 숨기고, 전체보기 모드에선 한장씩 복귀 버튼 표시 */
+    #ticket-all-view-btn {
+      display: none;
+    }
+
+    .main-content.is-all-view #ticket-all-view-btn {
+      display: inline-block;
+    }
+
+    /* =========================================================
+       하단 고정 동화책 페이지 내비게이션 바
+       ========================================================= */
+    .storybook-navbar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      width: 100%;
+      max-width: 430px;
+      z-index: 45;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px max(12px, env(safe-area-inset-bottom));
+      background: rgba(253, 249, 240, 0.94);
+      backdrop-filter: blur(8px);
+      border-top: 1.5px dashed #E4D4BA;
+      box-shadow: 0 -6px 20px rgba(74, 62, 53, 0.06);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
+    }
+
+    .storybook-navbar.is-visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .storybook-navbar.is-hidden-for-all {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateX(-50%) translateY(16px);
+    }
+
+    .nav-prev-btn {
+      flex-shrink: 0;
+      border: 1.5px solid var(--border-warm);
+      background: var(--paper-white);
+      color: var(--text-brown);
+      font-family: var(--font-clean);
+      font-size: 16.5px;
+      font-weight: 700;
+      padding: 12px 15px;
+      border-radius: 999px;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 0.15s ease, opacity 0.2s ease;
+    }
+
+    .nav-prev-btn:disabled {
+      opacity: 0.38;
+      cursor: default;
+    }
+
+    .nav-prev-btn:not(:disabled):active {
+      transform: scale(0.96);
+    }
+
+    .nav-next-btn {
+      flex: 1;
+      border: none;
+      background: linear-gradient(135deg, #FCE39A 0%, var(--accent-butter-deep) 100%);
+      color: var(--text-brown);
+      font-family: var(--font-hand);
+      font-size: 21px;
+      font-weight: 700;
+      padding: 12px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      touch-action: manipulation;
+      box-shadow: 0 6px 16px rgba(241, 201, 103, 0.42);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .nav-next-btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 3px 10px rgba(241, 201, 103, 0.32);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 꽃가루(Confetti) & 떠오르는 하트 효과 레이어 -->
+    <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+    <div id="floating-hearts-layer" aria-hidden="true"></div>
+
+    <!-- 동화책 상단 고정 바 (봉투 개봉 후 표시) -->
+    <header id="storybook-topbar" class="storybook-topbar" aria-label="동화책 진행 상태 및 도구">
+      <div class="storybook-progress-track" aria-hidden="true">
+        <div id="storybook-progress-bar" class="storybook-progress-bar"></div>
+      </div>
+      <div class="storybook-topbar-row">
+        <div class="topbar-left">
+          <span id="page-counter-badge" class="page-counter-badge">1 / 8</span>
+          <div id="page-dots" class="page-dots" role="tablist" aria-label="페이지 이동"></div>
+        </div>
+        <div class="topbar-right">
+          <button id="view-mode-btn" class="topbar-pill-btn" type="button" aria-pressed="false" aria-label="전체 스크롤 보기로 전환">
+            <span>📖</span>
+            <span id="view-mode-label">전체</span>
+          </button>
+          <button id="bgm-toggle-btn" class="topbar-pill-btn" type="button" aria-pressed="false" aria-label="배경 오르골 켜기 또는 끄기">
+            <span>🎵</span>
+            <span id="bgm-toggle-label">오르골</span>
+          </button>
+        </div>
+      </div>
+    </header>
+    <audio id="bgm-audio" src="./bgm.mp3" loop preload="none"></audio>
+
+    <!-- =========================================================
+         [섹션 1: 스포일러 방지 서프라이즈 인트로]
+         ========================================================= -->
+    <section id="intro-screen" class="intro-screen" aria-label="비밀 편지 인트로">
+      <div class="intro-stars-bg" aria-hidden="true">
+        <svg class="bg-sparkle s1" viewBox="0 0 32 32" fill="none">
+          <path d="M16 2l3.2 9.8L29 15l-9.8 3.2L16 28l-3.2-9.8L3 15l9.8-3.2L16 2z" fill="#FCE5A2"/>
+        </svg>
+        <svg class="bg-sparkle s2" viewBox="0 0 32 32" fill="none">
+          <path d="M16 2l3.2 9.8L29 15l-9.8 3.2L16 28l-3.2-9.8L3 15l9.8-3.2L16 2z" fill="#F9D6CE"/>
+        </svg>
+        <svg class="bg-sparkle s3" viewBox="0 0 32 32" fill="none">
+          <path d="M16 2l3.2 9.8L29 15l-9.8 3.2L16 28l-3.2-9.8L3 15l9.8-3.2L16 2z" fill="#D4E4D1"/>
+        </svg>
+        <svg class="bg-sparkle s4" viewBox="0 0 32 32" fill="none">
+          <path d="M16 2l3.2 9.8L29 15l-9.8 3.2L16 28l-3.2-9.8L3 15l9.8-3.2L16 2z" fill="#FCE5A2"/>
+        </svg>
+      </div>
+
+      <div class="intro-top-emblem" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <path d="M18 4l3.5 9.5L31 17l-9.5 3.5L18 30l-3.5-9.5L5 17l9.5-3.5L18 4z" fill="#FCE5A2" stroke="#D7B257" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="28" cy="8" r="2.2" fill="#F9D6CE"/>
+          <circle cx="8" cy="27" r="1.8" fill="#D4E4D1"/>
+        </svg>
+      </div>
+
+      <p class="intro-caption">
+        부모님께 꼭 전해드릴<br />
+        소중한 비밀 편지가 도착했어요<br />
+        <span class="touch-hint">봉투를 터치해 열어주세요 💌</span>
+      </p>
+
+      <!-- 우표 + 소인 + 입체 밀랍 인장 봉투 -->
+      <button id="envelope-btn" class="envelope-btn" type="button" aria-label="비밀 편지 봉투 열기">
+        <div class="envelope-body">
+          <div class="envelope-stamp-wrap" aria-hidden="true">
+            <div class="envelope-postmark">
+              <span>비밀</span>
+              <span>우편</span>
+            </div>
+            <div class="envelope-stamp">
+              <span>✨</span>
+              <span>SPECIAL</span>
+            </div>
+          </div>
+          <div class="envelope-letter-peek">
+            <span>축하합니다! 🎉</span>
+          </div>
+          <div class="envelope-front-pocket"></div>
+        </div>
+        <div class="envelope-flap"></div>
+        <div class="envelope-seal" aria-hidden="true">💛</div>
+      </button>
+    </section>
+
+    <!-- =========================================================
+         메인 동화책 콘텐츠 (봉투 개봉 후 한 장씩 표시)
+         ========================================================= -->
+    <main id="main-content" class="main-content">
+
+      <!-- [1장: 서프라이즈 반전 축하] -->
+      <section id="page-reveal" class="story-page" aria-labelledby="reveal-title">
+        <div class="story-page-inner">
+          <div class="reveal-hero">
+            <!-- 구름 위 아기 양 일러스트 (개봉 후 서프라이즈 등장) -->
+            <div class="sheep-hero-wrap" aria-hidden="true">
+              <svg viewBox="0 0 220 190" width="100%" height="auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M40 165h140c16 0 28-11 28-25 0-12.5-9.8-23-22.6-24.6C180.5 98 164 86 144.5 86c-6.2 0-12.2 1.3-17.6 3.7C119.5 80 107.6 74 94 74c-19 0-35 12.6-39.6 29.7C41 106 30 118 30 133c0 17.7 13.8 32 30 32z" fill="#FFFFFF" stroke="#EBDDC7" stroke-width="3"/>
+                <path d="M35 55l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z" fill="#FCE5A2"/>
+                <path d="M182 44l2.5 5.5 5.5 2.5-5.5 2.5-2.5 5.5-2.5-5.5-5.5-2.5 5.5-2.5 2.5-5.5z" fill="#F9D6CE"/>
+
+                <ellipse cx="69" cy="70" rx="16" ry="9" transform="rotate(-24 69 70)" fill="#FCE5A2" stroke="#4A3E35" stroke-width="2.5"/>
+                <ellipse cx="151" cy="70" rx="16" ry="9" transform="rotate(24 151 70)" fill="#FCE5A2" stroke="#4A3E35" stroke-width="2.5"/>
+
+                <circle cx="80" cy="108" r="24" fill="#FFFFFF" stroke="#4A3E35" stroke-width="2.5"/>
+                <circle cx="140" cy="108" r="24" fill="#FFFFFF" stroke="#4A3E35" stroke-width="2.5"/>
+                <circle cx="110" cy="116" r="28" fill="#FFFFFF" stroke="#4A3E35" stroke-width="2.5"/>
+                <circle cx="72" cy="86" r="20" fill="#FFFFFF" stroke="#4A3E35" stroke-width="2.5"/>
+                <circle cx="148" cy="86" r="20" fill="#FFFFFF" stroke="#4A3E35" stroke-width="2.5"/>
+                <circle cx="110" cy="54" r="22" fill="#FFFFFF" stroke="#4A3E35" stroke-width="2.5"/>
+                <circle cx="110" cy="100" r="34" fill="#FFFFFF"/>
+
+                <ellipse cx="110" cy="80" rx="31" ry="25" fill="#FFF3D6" stroke="#4A3E35" stroke-width="2.5"/>
+
+                <circle cx="96" cy="56" r="11" fill="#FFFFFF" stroke="#4A3E35" stroke-width="2.2"/>
+                <circle cx="111" cy="53" r="12" fill="#FFFFFF" stroke="#4A3E35" stroke-width="2.2"/>
+                <circle cx="125" cy="57" r="10" fill="#FFFFFF" stroke="#4A3E35" stroke-width="2.2"/>
+                <path d="M88 60h44v8H88z" fill="#FFFFFF"/>
+
+                <circle cx="97" cy="79" r="3.4" fill="#4A3E35"/>
+                <circle cx="123" cy="79" r="3.4" fill="#4A3E35"/>
+                <circle cx="95.8" cy="77.8" r="1.1" fill="#FFFFFF"/>
+                <circle cx="121.8" cy="77.8" r="1.1" fill="#FFFFFF"/>
+                <ellipse cx="89" cy="87" rx="5.5" ry="3.2" fill="#F9D6CE"/>
+                <ellipse cx="131" cy="87" rx="5.5" ry="3.2" fill="#F9D6CE"/>
+                <path d="M104 88c2.5 3.5 9.5 3.5 12 0" stroke="#4A3E35" stroke-width="2.3" stroke-linecap="round"/>
+
+                <ellipse cx="92" cy="134" rx="8" ry="6" fill="#FCE5A2" stroke="#4A3E35" stroke-width="2.2"/>
+                <ellipse cx="128" cy="134" rx="8" ry="6" fill="#FCE5A2" stroke="#4A3E35" stroke-width="2.2"/>
+              </svg>
+            </div>
+
+            <span class="year-badge">🐑 2027 정미년 아기 양 또콩이</span>
+            <h1 id="reveal-title" class="reveal-title">
+              축하합니다!<br />
+              할아버지, 할머니가 되셨어요!
+            </h1>
+            <p id="reveal-subtitle" class="reveal-subtitle">
+              2027년 7월 19일, 작은 천사가 찾아옵니다
+            </p>
+            <div class="reveal-summary-chips">
+              <span class="reveal-chip">📅 2027.07.19 예정</span>
+              <span class="reveal-chip">💛 엄마 &amp; 아빠의 첫 선물</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="story-divider" aria-hidden="true">
+        <span></span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3l2.1 6.4L20.5 11.5l-6.4 2.1L12 20l-2.1-6.4L3.5 11.5l6.4-2.1L12 3z" fill="#F1C967"/>
+        </svg>
+        <span></span>
+      </div>
+
+      <!-- [2장: 마스킹 테이프 손편지] -->
+      <section id="page-letter" class="story-page" data-next-label="또콩이 편지 읽기 →" aria-label="또콩이의 손편지">
+        <div class="story-page-inner">
+          <article class="letter-sheet">
+            <span class="letter-greeting-chip">또콩이의 첫인사 ✉️</span>
+            <div class="letter-text">
+              <p>안녕하세요, 할아버지 할머니!</p>
+              <p>
+                아직은 아주 작고 조그마한 콩알 같은 모습이지만,<br />
+                엄마와 아빠의 사랑을 듬뿍 받으며 무럭무럭 자라고 있어요.
+              </p>
+              <p>
+                내년 7월, 포근한 아기 양이 되어<br />
+                할아버지 할머니 품에 쏙 안길 날을 손꼽아 기다리고 있어요!
+              </p>
+              <p>건강하게 잘 자라서 곧 만나 뵈러 갈게요!</p>
+            </div>
+            <p class="letter-sign">- 엄마 뱃속에서, 또콩이 올림 💛 -</p>
+          </article>
+        </div>
+      </section>
+
+      <div class="story-divider" aria-hidden="true">
+        <span></span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3l2.1 6.4L20.5 11.5l-6.4 2.1L12 20l-2.1-6.4L3.5 11.5l6.4-2.1L12 3z" fill="#F1C967"/>
+        </svg>
+        <span></span>
+      </div>
+
+      <!-- [3장: 오늘의 또콩이 성장 다이어리 노트] -->
+      <section id="page-growth" class="story-page" data-next-label="지금 얼마나 컸을까? →" aria-labelledby="growth-title">
+        <div class="story-page-inner">
+          <div class="growth-notebook">
+            <div class="growth-header-strip">
+              <h2 id="growth-title">오늘 또콩이는 얼마나 컸을까?</h2>
+              <span id="growth-week-pill" class="growth-week-pill">뱃속 6주</span>
+            </div>
+
+            <div class="growth-body">
+              <div class="growth-fruit-row">
+                <div id="growth-emoji" class="growth-emoji-badge" aria-hidden="true">🫛</div>
+                <div>
+                  <p id="growth-status-title" class="growth-status-title">지금 또콩이는 엄마 뱃속 6주 0일!</p>
+                  <p id="growth-status-desc" class="growth-status-desc">딱 귀여운 작은 콩알(완두콩)만 한 크기예요 (약 6mm)</p>
+                </div>
+              </div>
+
+              <div class="growth-progress-wrap">
+                <div class="growth-track" aria-hidden="true">
+                  <div id="growth-fill" class="growth-fill">
+                    <div class="growth-walker">🐑</div>
+                  </div>
+                </div>
+                <div class="growth-scale-labels">
+                  <span>🌱 0주</span>
+                  <span id="growth-percent-label">열심히 크는 중!</span>
+                  <span>🍼 40주</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="growth-story-note">할아버지 할머니 생각하면서 오늘도 쑥쑥 크고 있어요! 🌱</p>
+        </div>
+      </section>
+
+      <div class="story-divider" aria-hidden="true">
+        <span></span>
+        <svg width="26" height="18" viewBox="0 0 26 18" fill="none">
+          <path d="M6 15h14c2.8 0 5-2 5-4.5S22.8 6 20 6c-.5 0-1 .1-1.4.2C17.8 3.8 15.4 2 12.5 2 9 2 6.2 4.6 6 8c-2.2.3-4 2-4 4.2C2 13.8 3.8 15 6 15z" fill="#D4E4D1"/>
+        </svg>
+        <span></span>
+      </div>
+
+      <!-- [4장: 손가락으로 쓱쓱! 초음파 복권 + 확대 라이트박스] -->
+      <section id="page-photo" class="story-page" data-next-label="첫 초음파 사진 보기 →" aria-labelledby="photo-title">
+        <div class="story-page-inner">
+          <div class="photo-section-wrap">
+            <h2 id="photo-title" class="section-title">짜잔, 저의 첫 번째 사진이에요!</h2>
+            <p id="photo-guide-sub" class="photo-guide-sub">황금빛 구름을 손가락으로 살살 문질러 보세요 ✨</p>
+
+            <div id="polaroid-frame" class="polaroid-frame">
+              <div class="polaroid-tape" aria-hidden="true"></div>
+              <div id="polaroid-photo-box" class="polaroid-photo-box">
+                <img
+                  id="ultrasound-img"
+                  src="./ultrasound.jpg"
+                  alt="또콩이의 첫 번째 초음파 사진"
+                />
+                <div id="ultrasound-fallback" class="ultrasound-fallback">
+                  <span style="font-size: 34px; margin-bottom: 8px;">📸</span>
+                  <span>또콩이의 첫 초음파 사진</span>
+                  <span style="font-size: 14.5px; opacity: 0.85; margin-top: 4px;">
+                    (같은 폴더에 ultrasound.jpg를 넣어주세요)
+                  </span>
+                </div>
+                <canvas id="scratch-canvas" class="scratch-canvas" aria-label="초음파 사진 긁어보기 영역"></canvas>
+              </div>
+              <p class="polaroid-caption">
+                아직은 작지만 벌써 할아버지, 할머니 닮아서 귀엽대요!
+              </p>
+            </div>
+
+            <div class="photo-actions-row">
+              <button id="reveal-photo-btn" class="reveal-photo-btn" type="button">
+                ✨ 긁기 어려우면 한 번에 보기
+              </button>
+              <span id="zoom-hint-text" class="zoom-hint-text">
+                🔍 사진을 누르면 크게 볼 수 있어요
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="story-divider" aria-hidden="true">
+        <span></span>
+        <svg width="22" height="20" viewBox="0 0 24 22" fill="none">
+          <path d="M12 20s-8.5-5.3-8.5-11.2C3.5 5.4 6.1 3 9 3c1.6 0 2.5.8 3 1.8.5-1 1.4-1.8 3-1.8 2.9 0 5.5 2.4 5.5 5.8C20.5 14.7 12 20 12 20z" fill="#F9D6CE"/>
+        </svg>
+        <span></span>
+      </div>
+
+      <!-- [5장: 심장소리 듣기 (조건부 활성화 구조)] -->
+      <section id="page-heartbeat" class="story-page" data-next-label="심장소리 들어보기 →" aria-labelledby="heartbeat-title">
+        <div class="story-page-inner">
+          <div id="heartbeat-section" class="heartbeat-card">
+            <h2 id="heartbeat-title" class="section-title">제 심장 소리 한번 들어보실래요?</h2>
+            <p class="heartbeat-subtitle">아래 동그란 버튼을 꾹 눌러보세요</p>
+
+            <div id="heartbeat-btn-wrap" class="heartbeat-btn-wrap">
+              <button id="heartbeat-btn" class="heartbeat-btn" type="button" aria-label="또콩이 심장 소리 재생">
+                <svg width="56" height="44" viewBox="0 0 100 72" fill="none" aria-hidden="true">
+                  <circle cx="35" cy="40" r="14" fill="#FFFFFF" stroke="#4A3E35" stroke-width="2.5"/>
+                  <circle cx="65" cy="40" r="14" fill="#FFFFFF" stroke="#4A3E35" stroke-width="2.5"/>
+                  <circle cx="50" cy="25" r="15" fill="#FFFFFF" stroke="#4A3E35" stroke-width="2.5"/>
+                  <ellipse cx="50" cy="39" rx="19" ry="15" fill="#FFF3D6" stroke="#4A3E35" stroke-width="2.5"/>
+                  <circle cx="43" cy="38" r="2.3" fill="#4A3E35"/>
+                  <circle cx="57" cy="38" r="2.3" fill="#4A3E35"/>
+                  <path d="M46 44c1.8 2 6.2 2 8 0" stroke="#4A3E35" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span class="heartbeat-heart-icon" aria-hidden="true">💓</span>
+              </button>
+              <div class="heartbeat-ring" aria-hidden="true"></div>
+            </div>
+
+            <div id="soundwave-bars" class="soundwave-bars" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+
+            <p id="heartbeat-status" class="heartbeat-status-text">눌러서 심장소리 듣기</p>
+            <p id="heartbeat-notice" class="heartbeat-notice" role="status"></p>
+
+            <audio id="heartbeat-audio" src="./heartbeat.mp3" preload="none"></audio>
+          </div>
+        </div>
+      </section>
+
+      <div id="heartbeat-divider" class="story-divider" aria-hidden="true">
+        <span></span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3l2.1 6.4L20.5 11.5l-6.4 2.1L12 20l-2.1-6.4L3.5 11.5l6.4-2.1L12 3z" fill="#F1C967"/>
+        </svg>
+        <span></span>
+      </div>
+
+      <!-- [6장: 2027년 7월 미니 손그림 달력 & D-Day] -->
+      <section id="page-calendar" class="story-page" data-next-label="만나는 날 달력 보기 →" aria-labelledby="dday-title">
+        <div class="story-page-inner">
+          <div class="calendar-sheet">
+            <h2 id="dday-title" class="section-title">우리가 만날 날을 기다려요</h2>
+
+            <div class="dday-banner">
+              <p class="dday-label">또콩이와 만나는 날까지</p>
+              <p id="dday-count" class="dday-count">D-238</p>
+              <p id="dday-date-sub" class="dday-date-sub">2027년 7월 19일 (월) 예정 💛</p>
+            </div>
+
+            <div class="mini-calendar" aria-label="출산 예정일 달력">
+              <p id="cal-month-title" class="cal-month-title">2027년 7월</p>
+              <div class="cal-weekdays" aria-hidden="true">
+                <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+              </div>
+              <div id="cal-days-grid" class="cal-days-grid"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="story-divider" aria-hidden="true">
+        <span></span>
+        <svg width="22" height="20" viewBox="0 0 24 22" fill="none">
+          <path d="M12 20s-8.5-5.3-8.5-11.2C3.5 5.4 6.1 3 9 3c1.6 0 2.5.8 3 1.8.5-1 1.4-1.8 3-1.8 2.9 0 5.5 2.4 5.5 5.8C20.5 14.7 12 20 12 20z" fill="#FCE5A2"/>
+        </svg>
+        <span></span>
+      </div>
+
+      <!-- [7장: 사랑 보내기 + 5칸 하트 게이지 + 스페셜 피날레] -->
+      <section id="page-love" class="story-page" data-next-label="또콩이에게 사랑 보내기 →" aria-labelledby="love-title">
+        <div class="story-page-inner">
+          <div class="love-box">
+            <h2 id="love-title" class="section-title">또콩이에게 사랑을 보내주세요</h2>
+
+            <div id="love-gauge" class="love-gauge" aria-label="사랑 5단계 게이지">
+              <span class="gauge-slot">💛</span>
+              <span class="gauge-slot">💛</span>
+              <span class="gauge-slot">💛</span>
+              <span class="gauge-slot">💛</span>
+              <span class="gauge-slot">💛</span>
+            </div>
+            <p id="love-gauge-hint" class="love-gauge-hint">
+              사랑 5번을 채우면 또콩이의 깜짝 메시지가 열려요! (0 / 5)
+            </p>
+
+            <button id="love-btn" class="love-btn" type="button">
+              <span>💛</span>
+              <span>또콩이에게 사랑 보내기</span>
+            </button>
+
+            <p id="love-counter-text" class="love-counter-text">
+              버튼을 눌러 또콩이에게 사랑을 전해주세요!
+            </p>
+            <p id="love-reply" class="love-reply-bubble" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+
+      <div class="story-divider" aria-hidden="true">
+        <span></span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3l2.1 6.4L20.5 11.5l-6.4 2.1L12 20l-2.1-6.4L3.5 11.5l6.4-2.1L12 3z" fill="#D4E4D1"/>
+        </svg>
+        <span></span>
+      </div>
+
+      <!-- [8장: 예비 할아버지·할머니 취임 초대권 피날레] -->
+      <section id="page-ticket" class="story-page" data-next-label="마지막 초대권 받기 →" aria-labelledby="ticket-title">
+        <div class="story-page-inner">
+          <div class="ticket-card">
+            <div class="ticket-top">
+              <span class="ticket-badge">SPECIAL INVITATION</span>
+              <h2 id="ticket-title" class="ticket-title">예비 할아버지 · 할머니 취임 초대권</h2>
+
+              <div class="ticket-info-list">
+                <div class="ticket-info-row">
+                  <span class="label">초대 손님</span>
+                  <span class="value">사랑하는 할아버지 · 할머니</span>
+                </div>
+                <div class="ticket-info-row">
+                  <span class="label">예정 일시</span>
+                  <span id="ticket-date-value" class="value">2027년 7월 19일 (월)</span>
+                </div>
+                <div class="ticket-info-row">
+                  <span class="label">주인공</span>
+                  <span class="value">정미년 아기 양 또콩이 🐑</span>
+                </div>
+                <div class="ticket-info-row">
+                  <span class="label">준비물</span>
+                  <span class="value">아낌없는 사랑과 따뜻한 품 💛</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="ticket-perforation" aria-hidden="true">
+              <div class="ticket-dash-line"></div>
+            </div>
+
+            <div class="ticket-stub">
+              <div class="ticket-barcode" aria-hidden="true"></div>
+              <p id="ticket-serial" class="ticket-serial">NO. 20270719 · 또콩이 드림</p>
+            </div>
+          </div>
+
+          <div class="ticket-actions-wrap">
+            <button id="ticket-all-view-btn" class="ticket-action-btn is-primary" type="button">
+              📚 한 장씩 보기
+            </button>
+            <button id="ticket-restart-btn" class="ticket-action-btn" type="button">
+              💌 처음부터 다시 보기
+            </button>
+          </div>
+
+          <p class="footer-note">2027 정미년 아기 양 또콩이 · 엄마 &amp; 아빠</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- 하단 고정 동화책 페이지 내비게이션 바 -->
+    <nav id="storybook-navbar" class="storybook-navbar" aria-label="페이지 넘기기">
+      <button id="prev-page-btn" class="nav-prev-btn" type="button">← 이전</button>
+      <button id="next-page-btn" class="nav-next-btn" type="button">또콩이 편지 읽기 →</button>
+    </nav>
+
+    <!-- 초음파 사진 전체 화면 확대 라이트박스 -->
+    <div id="photo-lightbox" class="photo-lightbox" role="dialog" aria-modal="true" aria-label="초음파 사진 크게 보기">
+      <div class="lightbox-card">
+        <img id="lightbox-img" src="./ultrasound.jpg" alt="또콩이의 첫 번째 초음파 사진 크게 보기" />
+        <p class="lightbox-caption">아직은 작지만 벌써 할아버지, 할머니 닮아서 귀엽대요!</p>
+        <button id="lightbox-close-btn" class="lightbox-close-btn" type="button">닫기 ✕</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       [설정 변수] 여기서 간편하게 켜고 끄거나 날짜를 바꿀 수 있어요
+       ========================================================= */
+    // 심장소리 오디오(./heartbeat.mp3)가 있으면 true, 녹음 실패/없으면 false로 변경하세요.
+    const hasHeartbeatAudio = true;
+
+    // 배경 오르골 BGM: true면 ./bgm.mp3 재생, false면 내장 오르골 자장가 재생
+    const USE_CUSTOM_BGM_FILE = false;
+
+    // 출산 예정일 설정 (YYYY-MM-DD 형식)
+    const DUE_DATE = '2027-07-19';
+
+    /* =========================================================
+       공통 유틸: 로컬 날짜 파싱 (UTC 하루 밀림 방지)
+       ========================================================= */
+    function parseLocalDate(yyyyMmDd) {
+      const [year, month, day] = yyyyMmDd.split('-').map(Number);
+      return {
+        year,
+        month,
+        day,
+        date: new Date(year, month - 1, day)
+      };
+    }
+
+    const WEEKDAYS_KOR = ['일', '월', '화', '수', '목', '금', '토'];
+
+    /* =========================================================
+       1. 심장소리 조건부 페이지 필터링 준비
+       ========================================================= */
+    const heartbeatPageEl = document.getElementById('page-heartbeat');
+    const heartbeatDivider = document.getElementById('heartbeat-divider');
+    if (!hasHeartbeatAudio) {
+      if (heartbeatPageEl) heartbeatPageEl.classList.add('is-disabled-page');
+      if (heartbeatDivider) heartbeatDivider.classList.add('is-disabled-divider');
+    }
+
+    /* =========================================================
+       2. 파스텔톤 꽃가루(Confetti) 애니메이션
+       ========================================================= */
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const confettiCtx = confettiCanvas.getContext('2d');
+    let confettiPieces = [];
+    let confettiAnimId = null;
+
+    function resizeConfettiCanvas() {
+      confettiCanvas.width = confettiCanvas.clientWidth;
+      confettiCanvas.height = confettiCanvas.clientHeight;
+    }
+
+    function launchConfetti(pieceCount = 75) {
+      resizeConfettiCanvas();
+      const colors = ['#FCE5A2', '#F9D6CE', '#FFF5D6', '#D4E4D1', '#DCECF7', '#FFFFFF'];
+      confettiPieces = Array.from({ length: pieceCount }, () => ({
+        x: Math.random() * confettiCanvas.width,
+        y: -20 - Math.random() * 140,
+        w: 7 + Math.random() * 7,
+        h: 5 + Math.random() * 5,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 2.2,
+        vy: 2.2 + Math.random() * 2.8,
+        angle: Math.random() * 360,
+        vAngle: (Math.random() - 0.5) * 8,
+        opacity: 1
+      }));
+
+      if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+
+      function renderConfetti() {
+        confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        let activeCount = 0;
+
+        for (const p of confettiPieces) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.angle += p.vAngle;
+
+          if (p.y > confettiCanvas.height * 0.72) {
+            p.opacity -= 0.02;
+          }
+
+          if (p.opacity > 0 && p.y < confettiCanvas.height + 20) {
+            activeCount++;
+            confettiCtx.save();
+            confettiCtx.globalAlpha = Math.max(0, p.opacity);
+            confettiCtx.translate(p.x, p.y);
+            confettiCtx.rotate((p.angle * Math.PI) / 180);
+            confettiCtx.fillStyle = p.color;
+            confettiCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            confettiCtx.restore();
+          }
+        }
+
+        if (activeCount > 0) {
+          confettiAnimId = requestAnimationFrame(renderConfetti);
+        } else {
+          confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        }
+      }
+
+      renderConfetti();
+    }
+
+    window.addEventListener('resize', resizeConfettiCanvas);
+
+    /* =========================================================
+       3. 우측 상단 오르골 BGM (Web Audio API 또는 ./bgm.mp3)
+       ========================================================= */
+    const bgmToggleBtn = document.getElementById('bgm-toggle-btn');
+    const bgmToggleLabel = document.getElementById('bgm-toggle-label');
+    const bgmAudio = document.getElementById('bgm-audio');
+    const heartbeatAudio = document.getElementById('heartbeat-audio');
+
+    let isBgmPlaying = false;
+    let audioCtx = null;
+    let bgmTimerId = null;
+    let bgmNoteIdx = 0;
+
+    // 밝고 경쾌한 아기 오르골 멜로디 + 화음 반주 (높은 옥타브 C6~A6 + 따뜻한 아르페지오)
+    const C6 = 1046.50, D6 = 1174.66, E6 = 1318.51, F6 = 1396.91, G6 = 1567.98, A6 = 1760.00;
+    const C4 = 261.63, E4 = 329.63, G4 = 392.00, F4 = 349.23, A4 = 440.00, C5 = 523.25, D5 = 587.33, E5 = 659.25;
+
+    const LULLABY_STEPS = [
+      [C6, C4], [C6, G4], [G6, E5], [G6, G4], [A6, F4], [A6, C5], [G6, E5], [0, G4],
+      [F6, F4], [F6, C5], [E6, E5], [E6, C5], [D6, G4], [D6, D5], [C6, C5], [0, G4],
+      [G6, C5], [G6, G4], [F6, F4], [F6, C5], [E6, C5], [E6, G4], [D6, G4], [0, D5],
+      [G6, C5], [G6, G4], [F6, F4], [F6, C5], [E6, C5], [E6, G4], [D6, G4], [0, D5]
+    ];
+
+    function playBellTone(freq, peakGain, duration, isSparkle = false) {
+      if (!audioCtx || !freq) return;
+      const now = audioCtx.currentTime;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(peakGain, now + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0006, now + duration);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + duration + 0.04);
+
+      if (isSparkle) {
+        const bell = audioCtx.createOscillator();
+        const bellGain = audioCtx.createGain();
+        bell.type = 'sine';
+        bell.frequency.setValueAtTime(freq * 2, now);
+        bellGain.gain.setValueAtTime(0.0001, now);
+        bellGain.gain.linearRampToValueAtTime(peakGain * 0.25, now + 0.008);
+        bellGain.gain.exponentialRampToValueAtTime(0.0005, now + 0.14);
+        bell.connect(bellGain);
+        bellGain.connect(audioCtx.destination);
+        bell.start(now);
+        bell.stop(now + 0.18);
+      }
+    }
+
+    function playMusicBoxStep(step) {
+      if (!step) return;
+      const [melodyFreq, chordFreq] = step;
+      if (melodyFreq) playBellTone(melodyFreq, 0.052, 0.55, true);
+      if (chordFreq) playBellTone(chordFreq, 0.022, 0.42, false);
+    }
+
+    function updateBgmUI(playing) {
+      isBgmPlaying = playing;
+      bgmToggleBtn.classList.toggle('is-playing', playing);
+      bgmToggleBtn.setAttribute('aria-pressed', String(playing));
+      bgmToggleBtn.querySelector('span:first-child').textContent = playing ? '🔊' : '🎵';
+      bgmToggleLabel.textContent = playing ? '오르골 ON' : '오르골';
+    }
+
+    function pauseBgm() {
+      if (bgmTimerId) {
+        clearInterval(bgmTimerId);
+        bgmTimerId = null;
+      }
+      if (bgmAudio && !bgmAudio.paused) {
+        bgmAudio.pause();
+      }
+      updateBgmUI(false);
+    }
+
+    async function startBgm() {
+      // 심장소리가 재생 중이면 먼저 멈춤
+      if (heartbeatAudio && !heartbeatAudio.paused) {
+        heartbeatAudio.pause();
+        if (typeof setPlayingUI === 'function') setPlayingUI(false);
+      }
+
+      if (USE_CUSTOM_BGM_FILE && bgmAudio) {
+        try {
+          bgmAudio.volume = 0.4;
+          await bgmAudio.play();
+          updateBgmUI(true);
+        } catch (err) {
+          updateBgmUI(false);
+        }
+        return;
+      }
+
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+
+      if (!audioCtx) {
+        audioCtx = new AudioContextClass();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+
+      if (bgmTimerId) clearInterval(bgmTimerId);
+      bgmNoteIdx = 0;
+      updateBgmUI(true);
+      playMusicBoxStep(LULLABY_STEPS[bgmNoteIdx]);
+      bgmNoteIdx = (bgmNoteIdx + 1) % LULLABY_STEPS.length;
+
+      bgmTimerId = setInterval(() => {
+        if (!isBgmPlaying) return;
+        playMusicBoxStep(LULLABY_STEPS[bgmNoteIdx]);
+        bgmNoteIdx = (bgmNoteIdx + 1) % LULLABY_STEPS.length;
+      }, 330);
+    }
+
+    bgmToggleBtn.addEventListener('click', () => {
+      if (isBgmPlaying) {
+        pauseBgm();
+      } else {
+        startBgm();
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && isBgmPlaying) {
+        pauseBgm();
+      }
+    });
+
+    /* =========================================================
+       4. 봉투 개봉 & 동화책 페이지 내비게이션 / 전체 보기 전환
+       ========================================================= */
+    const introScreen = document.getElementById('intro-screen');
+    const envelopeBtn = document.getElementById('envelope-btn');
+    const mainContent = document.getElementById('main-content');
+    const storybookTopbar = document.getElementById('storybook-topbar');
+    const storybookProgressBar = document.getElementById('storybook-progress-bar');
+    const pageCounterBadge = document.getElementById('page-counter-badge');
+    const pageDotsWrap = document.getElementById('page-dots');
+    const viewModeBtn = document.getElementById('view-mode-btn');
+    const viewModeLabel = document.getElementById('view-mode-label');
+    const storybookNavbar = document.getElementById('storybook-navbar');
+    const prevPageBtn = document.getElementById('prev-page-btn');
+    const nextPageBtn = document.getElementById('next-page-btn');
+    const ticketAllViewBtn = document.getElementById('ticket-all-view-btn');
+    const ticketRestartBtn = document.getElementById('ticket-restart-btn');
+
+    const allStoryPages = Array.from(document.querySelectorAll('.story-page'));
+    const storyPages = allStoryPages.filter((page) => !page.classList.contains('is-disabled-page'));
+
+    let isOpened = false;
+    let currentPageIndex = 0;
+    let isAllViewMode = false;
+    let isScratchInitialized = false;
+
+    // 상단 진행 점(Dots) 동적 생성
+    const pageDots = storyPages.map((_, idx) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'page-dot';
+      dot.setAttribute('aria-label', `${idx + 1}번째 장으로 이동`);
+      dot.addEventListener('click', () => {
+        if (isAllViewMode) setViewMode(false);
+        const dir = idx >= currentPageIndex ? 'next' : 'prev';
+        goToPage(idx, dir);
+      });
+      pageDotsWrap.appendChild(dot);
+      return dot;
+    });
+
+    function goToPage(index, direction = 'next') {
+      if (!storyPages.length) return;
+      const targetIndex = Math.max(0, Math.min(storyPages.length - 1, index));
+
+      // 심장소리 페이지에서 벗어날 때 오디오 자동 정지
+      const leavingPage = storyPages[currentPageIndex];
+      if (leavingPage && leavingPage.id === 'page-heartbeat' && targetIndex !== currentPageIndex) {
+        if (heartbeatAudio && !heartbeatAudio.paused) {
+          heartbeatAudio.pause();
+          if (typeof setPlayingUI === 'function') setPlayingUI(false);
+        }
+      }
+
+      currentPageIndex = targetIndex;
+
+      storyPages.forEach((page, idx) => {
+        page.classList.remove('is-active', 'enter-next', 'enter-prev');
+        if (idx === targetIndex) {
+          page.classList.add('is-active');
+          void page.offsetWidth;
+          page.classList.add(direction === 'prev' ? 'enter-prev' : 'enter-next');
+        }
+      });
+
+      const total = storyPages.length;
+      const percent = ((targetIndex + 1) / total) * 100;
+      storybookProgressBar.style.width = `${percent}%`;
+
+      if (!isAllViewMode) {
+        pageCounterBadge.textContent = `${targetIndex + 1} / ${total}`;
+      }
+
+      pageDots.forEach((dot, idx) => {
+        dot.classList.toggle('is-active', idx === targetIndex);
+      });
+
+      prevPageBtn.disabled = targetIndex === 0;
+      if (targetIndex === total - 1) {
+        nextPageBtn.textContent = '📖 한눈에 전체 보기';
+      } else {
+        nextPageBtn.textContent = storyPages[targetIndex + 1].dataset.nextLabel || '다음 이야기 보기 →';
+      }
+
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
+      // 4장(초음파) 진입 시 실제 렌더 크기 기준으로 스크래치 캔버스 초기화
+      const activePage = storyPages[targetIndex];
+      if (activePage && activePage.id === 'page-photo' && !isScratchInitialized && !isUltrasoundRevealed) {
+        requestAnimationFrame(() => initScratchCanvas());
+      }
+    }
+
+    function setViewMode(allView) {
+      isAllViewMode = allView;
+      mainContent.classList.toggle('is-all-view', allView);
+      storybookNavbar.classList.toggle('is-hidden-for-all', allView);
+      viewModeBtn.classList.toggle('is-active-mode', allView);
+      viewModeBtn.setAttribute('aria-pressed', String(allView));
+      viewModeBtn.querySelector('span:first-child').textContent = allView ? '📚' : '📖';
+      viewModeLabel.textContent = allView ? '한장씩' : '전체';
+      pageDotsWrap.classList.toggle('is-hidden', allView);
+
+      if (allView) {
+        pageCounterBadge.textContent = '전체 보기';
+        storybookProgressBar.style.width = '100%';
+        if (!isScratchInitialized && !isUltrasoundRevealed) {
+          requestAnimationFrame(() => initScratchCanvas());
+        }
+      } else {
+        goToPage(currentPageIndex, 'next');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openInvitation() {
+      if (isOpened) return;
+      isOpened = true;
+
+      envelopeBtn.classList.add('is-opening');
+
+      setTimeout(() => {
+        launchConfetti(80);
+      }, 260);
+
+      setTimeout(() => {
+        mainContent.style.display = 'block';
+        requestAnimationFrame(() => {
+          mainContent.classList.add('is-visible');
+          introScreen.classList.add('is-hidden');
+          storybookTopbar.classList.add('is-visible');
+          storybookNavbar.classList.add('is-visible');
+          goToPage(0, 'next');
+        });
+      }, 740);
+    }
+
+    envelopeBtn.addEventListener('click', openInvitation);
+
+    prevPageBtn.addEventListener('click', () => {
+      if (currentPageIndex > 0) {
+        goToPage(currentPageIndex - 1, 'prev');
+      }
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+      if (currentPageIndex < storyPages.length - 1) {
+        goToPage(currentPageIndex + 1, 'next');
+      } else {
+        setViewMode(true);
+      }
+    });
+
+    viewModeBtn.addEventListener('click', () => {
+      setViewMode(!isAllViewMode);
+    });
+
+    if (ticketAllViewBtn) {
+      ticketAllViewBtn.addEventListener('click', () => {
+        setViewMode(false);
+      });
+    }
+
+    if (ticketRestartBtn) {
+      ticketRestartBtn.addEventListener('click', () => {
+        if (isAllViewMode) setViewMode(false);
+        goToPage(0, 'prev');
+      });
+    }
+
+    // 모바일 좌우 스와이프 제스처 지원 (스크래치 캔버스/라이트박스/전체보기 제외)
+    let swipeStartX = null;
+    let swipeStartY = null;
+    let swipeIgnored = false;
+
+    mainContent.addEventListener('touchstart', (e) => {
+      if (isAllViewMode || photoLightbox.classList.contains('is-open')) {
+        swipeIgnored = true;
+        return;
+      }
+      if (e.target && e.target.closest && e.target.closest('#scratch-canvas')) {
+        swipeIgnored = true;
+        return;
+      }
+      const t = e.touches[0];
+      if (!t) return;
+      swipeIgnored = false;
+      swipeStartX = t.clientX;
+      swipeStartY = t.clientY;
+    }, { passive: true });
+
+    mainContent.addEventListener('touchend', (e) => {
+      if (swipeIgnored || swipeStartX === null || swipeStartY === null) return;
+      const t = e.changedTouches[0];
+      if (!t) return;
+      const dx = t.clientX - swipeStartX;
+      const dy = t.clientY - swipeStartY;
+      swipeStartX = null;
+      swipeStartY = null;
+
+      if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0 && currentPageIndex < storyPages.length - 1) {
+          goToPage(currentPageIndex + 1, 'next');
+        } else if (dx > 0 && currentPageIndex > 0) {
+          goToPage(currentPageIndex - 1, 'prev');
+        }
+      }
+    }, { passive: true });
+
+    // 키보드 좌우 화살표 지원
+    document.addEventListener('keydown', (e) => {
+      if (!isOpened || isAllViewMode || photoLightbox.classList.contains('is-open')) return;
+      if (e.key === 'ArrowRight' && currentPageIndex < storyPages.length - 1) {
+        goToPage(currentPageIndex + 1, 'next');
+      } else if (e.key === 'ArrowLeft' && currentPageIndex > 0) {
+        goToPage(currentPageIndex - 1, 'prev');
+      }
+    });
+
+    /* =========================================================
+       5. 섹션 3 오늘의 또콩이 성장 다이어리 자동 계산
+       ========================================================= */
+    const GROWTH_STAGES = {
+      4:  { emoji: '🌾', name: '양귀비 씨앗', size: '약 1mm' },
+      5:  { emoji: '🌱', name: '작은 참깨 한 알', size: '약 2mm' },
+      6:  { emoji: '🫛', name: '작은 콩알(완두콩)', size: '약 6mm' },
+      7:  { emoji: '🫐', name: '동그란 블루베리', size: '약 1cm' },
+      8:  { emoji: '🍇', name: '작은 라즈베리', size: '약 1.6cm' },
+      9:  { emoji: '🍒', name: '반짝이는 체리', size: '약 2.3cm' },
+      10: { emoji: '🍓', name: '귀여운 딸기', size: '약 3.1cm' },
+      11: { emoji: '🍈', name: '무화과 한 알', size: '약 4.1cm' },
+      12: { emoji: '🍋', name: '상큼한 라임', size: '약 5.4cm' },
+      13: { emoji: '🫛', name: '완두콩 꼬투리', size: '약 7.4cm' },
+      14: { emoji: '🍋', name: '노란 레몬', size: '약 8.7cm' },
+      15: { emoji: '🍎', name: '아삭한 사과', size: '약 10cm' },
+      16: { emoji: '🥑', name: '든든한 아보카도', size: '약 11.6cm' },
+      17: { emoji: '🍐', name: '달콤한 서양배', size: '약 13cm' },
+      18: { emoji: '🫑', name: '알록달록 파프리카', size: '약 14cm' },
+      19: { emoji: '🍅', name: '탱글한 토마토', size: '약 15cm' },
+      20: { emoji: '🍌', name: '길쭉한 바나나', size: '약 16.5cm' },
+      21: { emoji: '🥕', name: '주황빛 당근', size: '약 26cm' },
+      22: { emoji: '🥭', name: '달콤한 파파야', size: '약 27.8cm' },
+      23: { emoji: '🍊', name: '탐스러운 자몽', size: '약 29cm' },
+      24: { emoji: '🌽', name: '알찬 옥수수', size: '약 30cm' },
+      25: { emoji: '🥦', name: '동글동글 콜리플라워', size: '약 34cm' },
+      26: { emoji: '🥬', name: '싱그러운 양상추', size: '약 35.6cm' },
+      27: { emoji: '🍆', name: '보랏빛 가지', size: '약 36.6cm' },
+      28: { emoji: '🥥', name: '튼튼한 코코넛', size: '약 37.6cm' },
+      29: { emoji: '🎃', name: '호박 한 덩이', size: '약 38.6cm' },
+      30: { emoji: '🥬', name: '커다란 양배추', size: '약 39.9cm' },
+      31: { emoji: '🥥', name: '둥근 코코넛', size: '약 41cm' },
+      32: { emoji: '🍈', name: '달콤한 멜론', size: '약 42cm' },
+      33: { emoji: '🍍', name: '노란 파인애플', size: '약 43.7cm' },
+      34: { emoji: '🍈', name: '커다란 칸탈루프', size: '약 45cm' },
+      35: { emoji: '🍯', name: '허니듀 멜론', size: '약 46cm' },
+      36: { emoji: '🥬', name: '풍성한 로메인 상추', size: '약 47.4cm' },
+      37: { emoji: '🍍', name: '묵직한 파인애플', size: '약 48.6cm' },
+      38: { emoji: '🎃', name: '작은 애호박', size: '약 49.8cm' },
+      39: { emoji: '🍉', name: '아기 수박', size: '약 50cm' },
+      40: { emoji: '🍉', name: '수박 한 통', size: '약 51cm' }
+    };
+
+    function renderGrowthCard() {
+      const { date: dueDate } = parseLocalDate(DUE_DATE);
+      const lmpDate = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate() - 280);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      const elapsedDays = Math.round((today.getTime() - lmpDate.getTime()) / (1000 * 60 * 60 * 24));
+      const clampedDays = Math.max(0, elapsedDays);
+      const weeks = Math.floor(clampedDays / 7);
+      const remDays = clampedDays % 7;
+
+      const weekPillEl = document.getElementById('growth-week-pill');
+      const emojiEl = document.getElementById('growth-emoji');
+      const titleEl = document.getElementById('growth-status-title');
+      const descEl = document.getElementById('growth-status-desc');
+      const fillEl = document.getElementById('growth-fill');
+      const percentLabelEl = document.getElementById('growth-percent-label');
+
+      const rawPercent = Math.round((clampedDays / 280) * 100);
+      const trackPercent = Math.min(96, Math.max(6, rawPercent));
+
+      if (elapsedDays < 28) {
+        weekPillEl.textContent = `뱃속 ${Math.max(0, weeks)}주 ${Math.max(0, remDays)}일`;
+        emojiEl.textContent = '🌱';
+        titleEl.textContent = `지금 또콩이는 엄마 뱃속 ${Math.max(0, weeks)}주 ${Math.max(0, remDays)}일!`;
+        descEl.textContent = '아직 아주 작은 씨앗으로 인사할 준비 중이에요 (1mm 미만)';
+        fillEl.style.width = `${trackPercent}%`;
+        percentLabelEl.textContent = `${Math.max(1, rawPercent)}% 진행 중`;
+        return;
+      }
+
+      if (elapsedDays >= 280) {
+        const finalStage = GROWTH_STAGES[40];
+        weekPillEl.textContent = '만삭 · 40주';
+        emojiEl.textContent = finalStage.emoji;
+        titleEl.textContent = '드디어 만날 날이 코앞이에요!';
+        descEl.textContent = `딱 귀여운 ${finalStage.name}만 한 크기예요 (${finalStage.size})`;
+        fillEl.style.width = '96%';
+        percentLabelEl.textContent = '100% 곧 만나요!';
+        return;
+      }
+
+      const stageWeek = Math.min(40, Math.max(4, weeks));
+      const stage = GROWTH_STAGES[stageWeek] || GROWTH_STAGES[6];
+
+      weekPillEl.textContent = `뱃속 ${weeks}주`;
+      emojiEl.textContent = stage.emoji;
+      titleEl.textContent = `지금 또콩이는 엄마 뱃속 ${weeks}주 ${remDays}일!`;
+      descEl.textContent = `딱 귀여운 ${stage.name}만 한 크기예요 (${stage.size})`;
+      fillEl.style.width = `${trackPercent}%`;
+      percentLabelEl.textContent = `${rawPercent}% 자랐어요!`;
+    }
+
+    renderGrowthCard();
+
+    /* =========================================================
+       6. 섹션 4 손가락으로 쓱쓱! 초음파 복권 & 확대 라이트박스
+       ========================================================= */
+    const polaroidFrame = document.getElementById('polaroid-frame');
+    const polaroidPhotoBox = document.getElementById('polaroid-photo-box');
+    const ultrasoundImg = document.getElementById('ultrasound-img');
+    const ultrasoundFallback = document.getElementById('ultrasound-fallback');
+    const scratchCanvas = document.getElementById('scratch-canvas');
+    const revealPhotoBtn = document.getElementById('reveal-photo-btn');
+    const zoomHintText = document.getElementById('zoom-hint-text');
+    const photoGuideSub = document.getElementById('photo-guide-sub');
+    const photoLightbox = document.getElementById('photo-lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCloseBtn = document.getElementById('lightbox-close-btn');
+
+    let ultrasoundLoaded = false;
+    let isUltrasoundRevealed = false;
+    let isScratching = false;
+    let lastPoint = null;
+    let scratchMoves = 0;
+
+    function handleUltrasoundLoaded() {
+      ultrasoundLoaded = true;
+      ultrasoundImg.style.display = 'block';
+      ultrasoundFallback.style.display = 'none';
+      if (isUltrasoundRevealed) {
+        polaroidPhotoBox.classList.add('is-zoomable');
+        zoomHintText.classList.add('is-visible');
+      }
+    }
+
+    function handleUltrasoundError() {
+      ultrasoundLoaded = false;
+      ultrasoundImg.style.display = 'none';
+      ultrasoundFallback.style.display = 'flex';
+    }
+
+    ultrasoundImg.addEventListener('load', handleUltrasoundLoaded);
+    ultrasoundImg.addEventListener('error', handleUltrasoundError);
+
+    // 스크립트 실행 전 이미 이미지 로딩이 끝난 경우(빠른 404/캐시 포함) 즉시 반영
+    if (ultrasoundImg.complete) {
+      if (ultrasoundImg.naturalWidth > 0) {
+        handleUltrasoundLoaded();
+      } else {
+        handleUltrasoundError();
+      }
+    }
+
+    function initScratchCanvas() {
+      if (!scratchCanvas || isUltrasoundRevealed) return;
+      const width = polaroidPhotoBox.clientWidth;
+      const height = polaroidPhotoBox.clientHeight;
+      if (!width || !height) return;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      scratchCanvas.width = Math.round(width * dpr);
+      scratchCanvas.height = Math.round(height * dpr);
+
+      const ctx = scratchCanvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // 버터 골드 스크래치 덮개 그라데이션
+      const grad = ctx.createLinearGradient(0, 0, width, height);
+      grad.addColorStop(0, '#FBE29D');
+      grad.addColorStop(0.5, '#F5D279');
+      grad.addColorStop(1, '#FCE9B8');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+
+      // 은은한 몽글몽글 구름 & 별 도트 패턴
+      ctx.fillStyle = 'rgba(255, 253, 248, 0.36)';
+      for (let i = 0; i < 16; i++) {
+        const cx = ((i * 53) % (width - 20)) + 10;
+        const cy = ((i * 37) % (height - 20)) + 10;
+        const r = 8 + (i % 4) * 5;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 가운데 손글씨 안내 문구
+      ctx.fillStyle = '#4A3E35';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = 'bold 21px "Gaegu", cursive';
+      ctx.fillText('✨ 손가락으로 살살 ✨', width / 2, height / 2 - 14);
+      ctx.font = 'bold 19px "Gaegu", cursive';
+      ctx.fillText('문질러 보세요!', width / 2, height / 2 + 16);
+
+      isScratchInitialized = true;
+    }
+
+    function revealUltrasound() {
+      if (isUltrasoundRevealed) return;
+      isUltrasoundRevealed = true;
+      scratchCanvas.classList.add('is-cleared');
+      polaroidFrame.classList.add('is-revealed');
+      revealPhotoBtn.classList.add('is-hidden');
+      photoGuideSub.textContent = '짜잔! 세상에서 제일 귀여운 또콩이가 나타났어요 💛';
+
+      if (ultrasoundLoaded) {
+        polaroidPhotoBox.classList.add('is-zoomable');
+        zoomHintText.classList.add('is-visible');
+      }
+
+      launchConfetti(48);
+      spawnFloatingHearts(5);
+    }
+
+    function checkScratchProgress() {
+      if (isUltrasoundRevealed) return;
+      const ctx = scratchCanvas.getContext('2d');
+      const { width, height } = scratchCanvas;
+      if (!width || !height) return;
+
+      const pixels = ctx.getImageData(0, 0, width, height).data;
+      let total = 0;
+      let transparent = 0;
+      const stride = 16;
+
+      for (let y = 0; y < height; y += stride) {
+        for (let x = 0; x < width; x += stride) {
+          const alpha = pixels[(y * width + x) * 4 + 3];
+          total++;
+          if (alpha < 128) transparent++;
+        }
+      }
+
+      if (total > 0 && transparent / total >= 0.45) {
+        revealUltrasound();
+      }
+    }
+
+    function getCanvasPoint(clientX, clientY) {
+      const rect = scratchCanvas.getBoundingClientRect();
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    }
+
+    function eraseAtPoint(pt) {
+      if (isUltrasoundRevealed) return;
+      const ctx = scratchCanvas.getContext('2d');
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 56;
+      ctx.beginPath();
+      if (lastPoint) {
+        ctx.moveTo(lastPoint.x, lastPoint.y);
+        ctx.lineTo(pt.x, pt.y);
+        ctx.stroke();
+      } else {
+        ctx.arc(pt.x, pt.y, 28, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      lastPoint = pt;
+
+      scratchMoves++;
+      if (scratchMoves % 8 === 0) {
+        checkScratchProgress();
+      }
+    }
+
+    scratchCanvas.addEventListener('pointerdown', (e) => {
+      if (isUltrasoundRevealed) return;
+      isScratching = true;
+      lastPoint = null;
+      if (scratchCanvas.setPointerCapture) {
+        try { scratchCanvas.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+      eraseAtPoint(getCanvasPoint(e.clientX, e.clientY));
+    });
+
+    scratchCanvas.addEventListener('pointermove', (e) => {
+      if (!isScratching || isUltrasoundRevealed) return;
+      eraseAtPoint(getCanvasPoint(e.clientX, e.clientY));
+    });
+
+    function endScratch() {
+      if (!isScratching) return;
+      isScratching = false;
+      lastPoint = null;
+      checkScratchProgress();
+    }
+
+    scratchCanvas.addEventListener('pointerup', endScratch);
+    scratchCanvas.addEventListener('pointercancel', endScratch);
+
+    // 모바일 인앱 브라우저 스크롤 간섭 방지용 터치 보완
+    scratchCanvas.addEventListener('touchstart', (e) => {
+      if (isUltrasoundRevealed) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      if (!t) return;
+      isScratching = true;
+      lastPoint = null;
+      eraseAtPoint(getCanvasPoint(t.clientX, t.clientY));
+    }, { passive: false });
+
+    scratchCanvas.addEventListener('touchmove', (e) => {
+      if (!isScratching || isUltrasoundRevealed) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      if (!t) return;
+      eraseAtPoint(getCanvasPoint(t.clientX, t.clientY));
+    }, { passive: false });
+
+    scratchCanvas.addEventListener('touchend', endScratch);
+
+    revealPhotoBtn.addEventListener('click', revealUltrasound);
+
+    // 라이트박스 확대 보기
+    function openLightbox() {
+      if (!isUltrasoundRevealed || !ultrasoundLoaded) return;
+      lightboxImg.src = ultrasoundImg.src;
+      photoLightbox.classList.add('is-open');
+    }
+
+    function closeLightbox() {
+      photoLightbox.classList.remove('is-open');
+    }
+
+    polaroidPhotoBox.addEventListener('click', openLightbox);
+    lightboxCloseBtn.addEventListener('click', closeLightbox);
+    photoLightbox.addEventListener('click', (e) => {
+      if (e.target === photoLightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && photoLightbox.classList.contains('is-open')) {
+        closeLightbox();
+      }
+    });
+
+    /* =========================================================
+       7. 섹션 5 심장소리 재생 (사용자 클릭 시에만 재생)
+       ========================================================= */
+    const heartbeatBtn = document.getElementById('heartbeat-btn');
+    const heartbeatBtnWrap = document.getElementById('heartbeat-btn-wrap');
+    const soundwaveBars = document.getElementById('soundwave-bars');
+    const heartbeatStatus = document.getElementById('heartbeat-status');
+    const heartbeatNotice = document.getElementById('heartbeat-notice');
+
+    function setPlayingUI(playing) {
+      if (!heartbeatBtn || !heartbeatBtnWrap) return;
+      heartbeatBtn.classList.toggle('is-playing', playing);
+      heartbeatBtnWrap.classList.toggle('is-playing', playing);
+      if (soundwaveBars) soundwaveBars.classList.toggle('is-playing', playing);
+      heartbeatStatus.textContent = playing
+        ? '두근두근, 또콩이 심장소리 재생 중...'
+        : '눌러서 심장소리 듣기';
+    }
+
+    if (hasHeartbeatAudio && heartbeatBtn && heartbeatAudio) {
+      heartbeatBtn.addEventListener('click', async () => {
+        heartbeatNotice.textContent = '';
+
+        if (!heartbeatAudio.paused) {
+          heartbeatAudio.pause();
+          setPlayingUI(false);
+          return;
+        }
+
+        // 심장소리를 잘 들으실 수 있게 배경 오르골 자동 일시정지
+        if (isBgmPlaying) {
+          pauseBgm();
+        }
+
+        try {
+          await heartbeatAudio.play();
+          setPlayingUI(true);
+        } catch (err) {
+          setPlayingUI(false);
+          heartbeatNotice.textContent = 'heartbeat.mp3 파일을 같은 폴더에 넣으면 소리가 재생됩니다!';
+        }
+      });
+
+      heartbeatAudio.addEventListener('ended', () => {
+        setPlayingUI(false);
+      });
+
+      heartbeatAudio.addEventListener('error', () => {
+        setPlayingUI(false);
+        heartbeatNotice.textContent = '오디오 파일(./heartbeat.mp3)을 찾지 못했어요.';
+      });
+    }
+
+    /* =========================================================
+       8. 섹션 6 & 8: 2027년 7월 미니 달력, D-Day & 티켓 날짜 동기화
+       ========================================================= */
+    const ddayCountEl = document.getElementById('dday-count');
+    const ddayDateSubEl = document.getElementById('dday-date-sub');
+    const calMonthTitleEl = document.getElementById('cal-month-title');
+    const calDaysGridEl = document.getElementById('cal-days-grid');
+    const ticketDateValueEl = document.getElementById('ticket-date-value');
+    const ticketSerialEl = document.getElementById('ticket-serial');
+
+    function renderDDayAndCalendar() {
+      const { year, month, day, date: target } = parseLocalDate(DUE_DATE);
+      const weekdayKor = WEEKDAYS_KOR[target.getDay()];
+
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const diffMs = target.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffDays > 0) {
+        ddayCountEl.textContent = `D-${diffDays}`;
+      } else if (diffDays === 0) {
+        ddayCountEl.textContent = 'D-Day 🎉';
+      } else {
+        ddayCountEl.textContent = `D+${Math.abs(diffDays)}`;
+      }
+
+      ddayDateSubEl.textContent = `${year}년 ${month}월 ${day}일 (${weekdayKor}) 예정 💛`;
+      if (ticketDateValueEl) {
+        ticketDateValueEl.textContent = `${year}년 ${month}월 ${day}일 (${weekdayKor})`;
+      }
+      if (ticketSerialEl) {
+        const paddedMonth = String(month).padStart(2, '0');
+        const paddedDay = String(day).padStart(2, '0');
+        ticketSerialEl.textContent = `NO. ${year}${paddedMonth}${paddedDay} · 또콩이 드림`;
+      }
+
+      // 월간 달력 그리드 동적 생성
+      calMonthTitleEl.textContent = `${year}년 ${month}월`;
+      calDaysGridEl.innerHTML = '';
+
+      const firstDayOfWeek = new Date(year, month - 1, 1).getDay();
+      const daysInMonth = new Date(year, month, 0).getDate();
+
+      for (let i = 0; i < firstDayOfWeek; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'cal-cell';
+        calDaysGridEl.appendChild(emptyCell);
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement('div');
+        const col = (firstDayOfWeek + d - 1) % 7;
+        cell.className = 'cal-cell';
+        if (col === 0) cell.classList.add('is-sun');
+        if (col === 6) cell.classList.add('is-sat');
+
+        if (d === day) {
+          cell.classList.add('is-due-day');
+          cell.innerHTML = `
+            <svg class="cal-due-ring" viewBox="0 0 40 38" fill="none" aria-hidden="true">
+              <path d="M21 3C11 2.5 3.5 9.5 3.2 19c-.3 9.2 6.8 15.8 16.5 16 10.2.2 17.5-6.6 17.2-15.8C36.6 10.4 29.8 3.4 20.5 3.2" stroke="#E67B73" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+            <span class="cal-day-num">${d}</span>
+            <span class="cal-due-tag">또콩이!</span>
+          `;
+        } else {
+          cell.textContent = String(d);
+        }
+
+        calDaysGridEl.appendChild(cell);
+      }
+    }
+
+    renderDDayAndCalendar();
+
+    /* =========================================================
+       9. 섹션 7: 사랑 보내기 + 랜덤 답장 + 5회 깜짝 피날레
+       ========================================================= */
+    const loveBtn = document.getElementById('love-btn');
+    const loveCounterText = document.getElementById('love-counter-text');
+    const loveReplyEl = document.getElementById('love-reply');
+    const loveGaugeSlots = document.querySelectorAll('#love-gauge .gauge-slot');
+    const loveGaugeHint = document.getElementById('love-gauge-hint');
+    const heartsLayer = document.getElementById('floating-hearts-layer');
+    const LOVE_STORAGE_KEY = 'ttokong_love_count_v1';
+
+    const BABY_REPLIES = [
+      '또콩이: "헤헤, 할아버지 할머니 사랑 듬뿍 받았어요! 💛"',
+      '또콩이: "기분 좋아서 뱃속에서 꼼지락꼼지락 춤추는 중이에요 🐑"',
+      '또콩이: "마음속에 하트가 뿅뿅 생겼어요! 고맙습니당 💕"',
+      '또콩이: "할아버지 할머니 목소리 듣고 싶어요~ 곧 만나요! 🥰"',
+      '또콩이: "사랑 에너지 충전 완료! 무럭무럭 자랄게요 💪✨"',
+      '또콩이: "따뜻한 사랑 덕분에 오늘도 포근해요 ☁️💛"',
+      '또콩이: "발차기 얍! 건강하게 잘 크고 있다는 인사예요 👣"'
+    ];
+
+    let loveCount = Number(localStorage.getItem(LOVE_STORAGE_KEY) || 0);
+    let lastReplyIndex = -1;
+
+    function renderLoveState() {
+      if (loveCount > 0) {
+        loveCounterText.textContent = `할아버지 할머니의 사랑 ${loveCount}번 전달 완료! 💛`;
+      }
+
+      const filled = loveCount === 0 ? 0 : ((loveCount - 1) % 5) + 1;
+      loveGaugeSlots.forEach((slot, idx) => {
+        slot.classList.toggle('is-filled', idx < filled);
+      });
+
+      if (loveCount > 0 && loveCount % 5 === 0) {
+        loveGaugeHint.textContent = `🎉 5번 채우기 성공! 또콩이 깜짝 메시지가 열렸어요! (5 / 5)`;
+      } else {
+        loveGaugeHint.textContent = `사랑 5번을 채우면 또콩이의 깜짝 메시지가 열려요! (${filled} / 5)`;
+      }
+    }
+
+    function spawnFloatingHearts(burst = 4) {
+      const emojis = ['💛', '🩷', '🤍', '💕', '💖'];
+
+      for (let i = 0; i < burst; i++) {
+        const heart = document.createElement('span');
+        heart.className = 'floating-heart';
+        heart.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        heart.style.left = `${14 + Math.random() * 72}%`;
+        heart.style.animationDelay = `${i * 0.07}s`;
+        heart.style.fontSize = `${24 + Math.floor(Math.random() * 14)}px`;
+
+        heartsLayer.appendChild(heart);
+        heart.addEventListener('animationend', () => {
+          heart.remove();
+        });
+      }
+    }
+
+    function showReplyMessage() {
+      const isSpecialMilestone = loveCount > 0 && loveCount % 5 === 0;
+      loveReplyEl.classList.toggle('is-special', isSpecialMilestone);
+
+      if (isSpecialMilestone) {
+        loveReplyEl.textContent =
+          `🎉 사랑 ${loveCount}번 달성! 할아버지 할머니 사랑 듬뿍 먹고 세상에서 제일 건강한 아기 양으로 태어날게요! 사랑해요!! 🐑💛✨`;
+        launchConfetti(65);
+        spawnFloatingHearts(10);
+      } else {
+        let nextIndex = Math.floor(Math.random() * BABY_REPLIES.length);
+        if (BABY_REPLIES.length > 1 && nextIndex === lastReplyIndex) {
+          nextIndex = (nextIndex + 1) % BABY_REPLIES.length;
+        }
+        lastReplyIndex = nextIndex;
+        loveReplyEl.textContent = BABY_REPLIES[nextIndex];
+        spawnFloatingHearts(4);
+      }
+
+      loveReplyEl.classList.remove('show');
+      void loveReplyEl.offsetWidth;
+      loveReplyEl.classList.add('show');
+    }
+
+    renderLoveState();
+
+    loveBtn.addEventListener('click', () => {
+      loveCount += 1;
+      localStorage.setItem(LOVE_STORAGE_KEY, String(loveCount));
+      renderLoveState();
+      showReplyMessage();
+    });
+  </script>
+</body>
+</html>
