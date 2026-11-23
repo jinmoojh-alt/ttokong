@@ -2621,6 +2621,11 @@
 
       envelopeBtn.classList.add('is-opening');
 
+      // 봉투 터치(사용자 제스처) 직후 오르골을 바로 켜서 모바일 자동재생 제한을 통과
+      if (!isBgmPlaying) {
+        startBgm();
+      }
+
       setTimeout(() => {
         launchConfetti(80);
       }, 260);
